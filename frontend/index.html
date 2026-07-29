@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FitTrack – Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- ✦ THEME BOOTSTRAP: runs synchronously before first paint — zero flash ✦ -->
+  <script>(function(){
+    var t=sessionStorage.getItem('ft_theme')||'light';
+    document.documentElement.setAttribute('data-theme',t);
+    if(t==='dark')document.documentElement.classList.add('preload-dark');
+  })();</script>
+  <style>
+    /* ── Tokens (Unified Health-Tech Palette) ── */
+    :root {
+      --primary:    #0d9488;
+      --accent:     #14b8a6;
+      --bg:         #f0fdfa;
+      --sidebar-bg: #0f172a;
+      --sidebar-w:  260px;
+      --text:       #1e293b;
+      --muted:      #94a3b8;
+      --border:     #e2e8f0;
+      --card-r:     0.85rem;
+      --card-bg:    #ffffff;
+    }
+    /* Dark mode via preload class (set synchronously) or body class (set by api.js) */
+    html.preload-dark body,
+    body.dark-mode {
+      --bg: #0f172a; --text: #e2e8f0; --muted: #94a3b8;
+      --border: #1e293b; --card-bg: #1e293b;
+      background: #0f172a !important; color: #e2e8f0;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; transition: background 0.3s, color 0.3s; }
+
+    /* ── Sidebar ── */
+    .sidebar { width: var(--sidebar-w); min-height: 100vh; background: var(--sidebar-bg); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; box-shadow: 4px 0 24px rgba(0,0,0,0.18); }
+    .sidebar-brand { padding: 1.6rem 1.5rem 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .brand-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .brand-icon { width: 38px; height: 38px; background: linear-gradient(135deg, var(--primary), var(--accent)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+    .brand-name { font-size: 1.3rem; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
+    .brand-sub { font-size: 0.65rem; color: rgba(255,255,255,0.4); letter-spacing: 0.05em; text-transform: uppercase; display: block; }
+    .sidebar-nav { padding: 1rem 0; }
+    .nav-section-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 0.8rem 1.5rem 0.4rem; }
+    .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 0.65rem 1.5rem; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.9rem; font-weight: 500; border-left: 3px solid transparent; transition: all 0.18s; }
+    .sidebar-link:hover { color: #fff; background: rgba(255,255,255,0.05); }
+    .sidebar-link.active { color: #fff; background: rgba(13,148,136,0.18); border-left-color: var(--primary); }
+    .sidebar-link .nav-icon { font-size: 1.05rem; width: 20px; text-align: center; }
+    .quote-card { margin: auto 1rem 1rem; background: linear-gradient(135deg, rgba(13,148,136,0.25), rgba(6,182,212,0.15)); border: 1px solid rgba(13,148,136,0.35); border-radius: var(--card-r); padding: 1rem 1.1rem; }
+    .quote-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 0.5rem; }
+    .quote-text { font-size: 0.82rem; color: rgba(255,255,255,0.8); font-style: italic; line-height: 1.5; }
+    .quote-author { font-size: 0.72rem; color: rgba(255,255,255,0.45); margin-top: 0.4rem; }
+
+    /* ── Image Slider ── */
+    .mot-slider { position: relative; border-radius: var(--card-r); overflow: hidden; margin-bottom: 1.75rem; height: 130px; background: var(--sidebar-bg); box-shadow: 0 4px 20px rgba(13,148,136,0.12); }
+    .mot-slide { position: absolute; inset: 0; display: flex; align-items: center; padding: 1.5rem 2rem; opacity: 0; transition: opacity 0.8s ease; pointer-events: none; }
+    .mot-slide.active { opacity: 1; pointer-events: auto; }
+    .mot-slide-icon { font-size: 2.8rem; margin-right: 1.4rem; flex-shrink: 0; }
+    .mot-slide-quote { font-size: 1rem; font-weight: 600; color: #fff; line-height: 1.45; margin-bottom: 0.3rem; }
+    .mot-slide-author { font-size: 0.75rem; color: rgba(255,255,255,0.5); }
+    .mot-dots { position: absolute; bottom: 10px; right: 14px; display: flex; gap: 5px; }
+    .mot-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.3); transition: background 0.3s; cursor: pointer; }
+    .mot-dot.active { background: var(--accent); }
+    .mot-slide:nth-child(1) { background: linear-gradient(135deg, #0f766e 0%, #0891b2 100%); }
+    .mot-slide:nth-child(2) { background: linear-gradient(135deg, #065f46 0%, #0d9488 100%); }
+    .mot-slide:nth-child(3) { background: linear-gradient(135deg, #1e3a5f 0%, #0d9488 100%); }
+    .mot-slide:nth-child(4) { background: linear-gradient(135deg, #6b21a8 0%, #0d9488 100%); }
+    .mot-slide:nth-child(5) { background: linear-gradient(135deg, #9f1239 0%, #c2410c 100%); }
+
+    /* ── Topbar ── */
+    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
+    .topbar-title { font-size: 1.6rem; font-weight: 800; color: var(--text); }
+    .topbar-date { font-size: 0.85rem; color: var(--muted); margin-top: 2px; }
+
+    /* ── Main ── */
+    .main-content { margin-left: var(--sidebar-w); flex: 1; padding: 2rem 2.5rem; min-height: 100vh; }
+
+    /* ── Goal Cards ── */
+    .goal-card { background: var(--card-bg, #fff); border: 1px solid var(--border); border-radius: var(--card-r); padding: 1.2rem 1.4rem; box-shadow: 0 2px 12px rgba(13,148,136,0.07); transition: transform 0.15s; }
+    .goal-card:hover { transform: translateY(-2px); }
+    .goal-icon { font-size: 1.6rem; margin-bottom: 0.5rem; }
+    .goal-value { font-size: 1.5rem; font-weight: 800; color: var(--text); line-height: 1; }
+    .goal-label { font-size: 0.78rem; color: var(--muted); margin-top: 0.2rem; }
+    .goal-sub   { font-size: 0.7rem; color: var(--muted); margin-top: 0.15rem; opacity: 0.75; }
+    .goal-progress { height: 6px; border-radius: 3px; background: var(--border); margin-top: 0.75rem; overflow: hidden; }
+    .goal-progress-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), var(--accent)); transition: width 0.6s ease; }
+    /* Alias for old stat card IDs */
+    .stat-card { background: var(--card-bg, #fff); border: 1px solid var(--border); border-radius: var(--card-r); padding: 1.2rem 1.4rem; box-shadow: 0 2px 12px rgba(13,148,136,0.07); }
+    .stat-icon { font-size: 1.6rem; margin-bottom: 0.5rem; }
+    .stat-value { font-size: 1.5rem; font-weight: 800; color: var(--text); line-height: 1; }
+    .stat-label { font-size: 0.78rem; color: var(--muted); margin-top: 0.2rem; }
+    .stat-progress { height: 6px; border-radius: 3px; background: var(--border); margin-top: 0.75rem; overflow: hidden; }
+    .stat-progress-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), var(--accent)); transition: width 0.6s ease; }
+
+    /* ── Score card special ── */
+    .score-card { background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%); border: none; }
+    .score-card .goal-value { color: #fff; font-size: 2rem; }
+    .score-card .goal-label { color: rgba(255,255,255,0.85); }
+    .score-card .goal-sub   { color: rgba(255,255,255,0.7); }
+    .score-card .goal-progress { background: rgba(255,255,255,0.25); }
+    .score-card .goal-progress-fill { background: #fff; }
+    .score-card .goal-icon { filter: grayscale(0); }
+
+    /* ── Form card ── */
+    .form-card { background: var(--card-bg, #fff); border: 1px solid var(--border); border-radius: var(--card-r); box-shadow: 0 4px 20px rgba(13,148,136,0.08); overflow: hidden; }
+    .form-card-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%); padding: 1.3rem 1.75rem; color: #fff; }
+    .form-card-header h5 { font-size: 1.05rem; font-weight: 700; margin: 0 0 2px; }
+    .form-card-header small { font-size: 0.8rem; opacity: 0.82; }
+    .form-card-body { padding: 1.6rem 1.75rem; }
+    .section-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; margin-bottom: 1rem; }
+    .form-label { font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem; }
+    .form-control, .form-select { border-color: #d1fae5; background: #f9fffe; font-size: 0.88rem; color: var(--text); border-radius: 0.5rem; }
+    .form-control:focus, .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(13,148,136,0.15); background: #fff; }
+    .form-control::placeholder { color: #94a3b8; }
+    .input-group-text { background: #f0fdfa; border-color: #d1fae5; color: var(--primary); }
+    .form-text { font-size: 0.72rem; color: var(--muted); }
+    .btn-submit { background: linear-gradient(135deg, var(--primary), var(--accent)); border: none; color: #fff; font-weight: 700; font-size: 0.95rem; padding: 0.72rem 2.5rem; border-radius: 0.55rem; transition: opacity 0.2s, transform 0.15s; }
+    .btn-submit:hover { opacity: 0.9; transform: translateY(-1px); color: #fff; }
+    .btn-reset { border: 1.5px solid var(--border); background: transparent; color: var(--muted); font-weight: 600; font-size: 0.9rem; padding: 0.7rem 1.8rem; border-radius: 0.55rem; }
+    .btn-reset:hover { border-color: var(--primary); color: var(--primary); }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <a href="index.html" class="brand-logo">
+      <div class="brand-icon">&#128170;</div>
+      <div><span class="brand-name">FitTrack</span><span class="brand-sub">Health Logger</span></div>
+    </a>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Menu</div>
+    <a href="index.html"      class="sidebar-link" data-page="index.html"><span class="nav-icon">&#128200;</span> Dashboard</a>
+    <a href="history.html"    class="sidebar-link" data-page="history.html"><span class="nav-icon">&#128203;</span> History</a>
+    <a href="medication.html" class="sidebar-link" data-page="medication.html"><span class="nav-icon">&#128138;</span> Medication</a>
+    <a href="awards.html"     class="sidebar-link" data-page="awards.html"><span class="nav-icon">&#127942;</span> Awards</a>
+    <a href="settings.html"   class="sidebar-link" data-page="settings.html"><span class="nav-icon">&#9881;&#65039;</span> Settings</a>
+  </nav>
+  <div class="quote-card">
+    <div class="quote-label">&#9889; Daily Motivation</div>
+    <p class="quote-text">"Take care of your body. It's the only place you have to live."</p>
+    <div class="quote-author">— Jim Rohn</div>
+  </div>
+</aside>
+
+<div class="main-content">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title" id="greeting">Good morning! &#9728;&#65039;</div>
+      <div class="topbar-date"  id="currentDate">Log your activity for today.</div>
+    </div>
+  </div>
+
+  <!-- Motivational Slider — 5 slides -->
+  <div class="mot-slider" id="motSlider">
+    <div class="mot-slide active">
+      <div class="mot-slide-icon">&#127947;</div>
+      <div class="mot-slide-body">
+        <div class="mot-slide-quote">"Take care of your body. It's the only place you have to live."</div>
+        <div class="mot-slide-author">— Jim Rohn</div>
+      </div>
+    </div>
+    <div class="mot-slide">
+      <div class="mot-slide-icon">&#9889;</div>
+      <div class="mot-slide-body">
+        <div class="mot-slide-quote">"Success is the sum of small efforts, repeated day in and day out."</div>
+        <div class="mot-slide-author">— Robert Collier</div>
+      </div>
+    </div>
+    <div class="mot-slide">
+      <div class="mot-slide-icon">&#128170;</div>
+      <div class="mot-slide-body">
+        <div class="mot-slide-quote">"The groundwork for all happiness is good health."</div>
+        <div class="mot-slide-author">— Leigh Hunt</div>
+      </div>
+    </div>
+    <div class="mot-slide">
+      <div class="mot-slide-icon">🌟</div>
+      <div class="mot-slide-body">
+        <div class="mot-slide-quote">"What seems impossible today will one day become your warm-up."</div>
+        <div class="mot-slide-author">— Unknown</div>
+      </div>
+    </div>
+    <div class="mot-slide">
+      <div class="mot-slide-icon">🏃</div>
+      <div class="mot-slide-body">
+        <div class="mot-slide-quote">"Don't stop when you're tired. Stop when you're done."</div>
+        <div class="mot-slide-author">— David Goggins</div>
+      </div>
+    </div>
+
+    <div class="mot-dots">
+      <div class="mot-dot active"></div>
+      <div class="mot-dot"></div>
+      <div class="mot-dot"></div>
+      <div class="mot-dot"></div>
+      <div class="mot-dot"></div>
+    </div>
+  </div>
+
+  <!-- Goal Progress Cards (5 cards) -->
+  <div class="row g-3 mb-4">
+    <!-- Steps -->
+    <div class="col">
+      <div class="goal-card">
+        <div class="goal-icon">&#128374;</div>
+        <div class="goal-value" id="statSteps">—</div>
+        <div class="goal-label">Steps Today</div>
+        <div class="goal-sub"  id="statStepsGoal">Goal: 10,000 steps</div>
+        <div class="goal-progress"><div class="goal-progress-fill" id="statStepsFill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <!-- Water -->
+    <div class="col">
+      <div class="goal-card">
+        <div class="goal-icon">&#128167;</div>
+        <div class="goal-value" id="statWater">—</div>
+        <div class="goal-label">Water Intake</div>
+        <div class="goal-sub"  id="statWaterGoal">Goal: 3 L</div>
+        <div class="goal-progress"><div class="goal-progress-fill" id="statWaterFill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <!-- Sleep -->
+    <div class="col">
+      <div class="goal-card">
+        <div class="goal-icon">&#127769;</div>
+        <div class="goal-value" id="statSleep">—</div>
+        <div class="goal-label">Sleep</div>
+        <div class="goal-sub"  id="statSleepGoal">Goal: 8 hrs</div>
+        <div class="goal-progress"><div class="goal-progress-fill" id="statSleepFill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <!-- Workout -->
+    <div class="col">
+      <div class="goal-card">
+        <div class="goal-icon">&#127947;</div>
+        <div class="goal-value" id="statWorkout">—</div>
+        <div class="goal-label">Last Workout</div>
+        <div class="goal-sub">Today's session</div>
+        <div class="goal-progress"><div class="goal-progress-fill" id="statWorkoutFill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <!-- Overall Score -->
+    <div class="col">
+      <div class="goal-card score-card">
+        <div class="goal-icon">🎯</div>
+        <div class="goal-value" id="statScore">0%</div>
+        <div class="goal-label">Goal Score</div>
+        <div class="goal-sub"  id="statScoreGoal">0/3 goals met</div>
+        <div class="goal-progress"><div class="goal-progress-fill" id="statScoreFill" style="width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Log form -->
+  <div class="form-card">
+    <div class="form-card-header">
+      <h5>&#128203; Log Today's Activity</h5>
+      <small>Fill in your daily stats and hit Save to track your progress.</small>
+    </div>
+    <form class="form-card-body" id="activityForm" onsubmit="event.preventDefault();" novalidate>
+
+      <div id="formAlert"></div>
+
+      <p class="section-label">&#127947; Workout</p>
+      <div class="row g-3 mb-4">
+        <div class="col-md-5">
+          <label for="workoutType" class="form-label">Gym Workout</label>
+          <select class="form-select" id="workoutType" name="workoutType" required>
+            <option value="" disabled selected>Select type&hellip;</option>
+            <optgroup label="Strength">
+              <option>Chest Day</option><option>Back &amp; Biceps</option>
+              <option>Leg Day</option><option>Shoulders &amp; Triceps</option><option>Full Body</option>
+            </optgroup>
+            <optgroup label="Cardio">
+              <option>Running</option><option>Cycling</option><option>HIIT</option><option>Swimming</option>
+            </optgroup>
+            <optgroup label="Flexibility">
+              <option>Yoga</option><option>Stretching</option><option>Rest / Recovery</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label for="workoutDuration" class="form-label">Duration (mins)</label>
+          <input type="number" class="form-control" id="workoutDuration" placeholder="e.g. 45" min="0" max="300" />
+        </div>
+        <div class="col-md-3">
+          <label for="workoutIntensity" class="form-label">Intensity</label>
+          <select class="form-select" id="workoutIntensity">
+            <option value="" disabled selected>Select&hellip;</option>
+            <option>Low</option><option>Moderate</option><option>High</option>
+          </select>
+        </div>
+        <div class="col-12">
+          <label for="workoutNotes" class="form-label">Notes <span class="fw-normal text-muted">(optional)</span></label>
+          <input type="text" class="form-control" id="workoutNotes" placeholder="e.g. 3×10 bench press at 60 kg" />
+        </div>
+      </div>
+
+      <p class="section-label">&#128198; Activity &amp; Hydration</p>
+      <div class="row g-3 mb-4">
+        <div class="col-md-4">
+          <label for="dailySteps" class="form-label">Daily Steps</label>
+          <div class="input-group">
+            <span class="input-group-text">&#128374;</span>
+            <input type="number" class="form-control" id="dailySteps" placeholder="e.g. 8000" min="0" max="100000" step="100" />
+          </div>
+          <div class="form-text" id="stepGoalHint">Goal: 10,000 steps</div>
+        </div>
+        <div class="col-md-4">
+          <label for="waterIntake" class="form-label">Water Intake</label>
+          <div class="input-group">
+            <span class="input-group-text">&#128167;</span>
+            <input type="number" class="form-control" id="waterIntake" placeholder="e.g. 2.5" min="0" max="20" step="0.1" />
+            <span class="input-group-text">L</span>
+          </div>
+          <div class="form-text">Recommended: 2–3 L</div>
+        </div>
+        <div class="col-md-4">
+          <label for="sleepHours" class="form-label">Sleep Hours</label>
+          <div class="input-group">
+            <span class="input-group-text">&#127769;</span>
+            <input type="number" class="form-control" id="sleepHours" placeholder="e.g. 7.5" min="0" max="24" step="0.5" />
+            <span class="input-group-text">hrs</span>
+          </div>
+          <div class="form-text">Optimal: 7–9 hrs</div>
+        </div>
+      </div>
+
+      <p class="section-label">&#128512; Mood &amp; Energy</p>
+      <div class="row g-3 mb-4">
+        <div class="col-md-6">
+          <label for="moodLevel" class="form-label">Overall Mood</label>
+          <select class="form-select" id="moodLevel">
+            <option value="" disabled selected>How are you feeling?</option>
+            <option value="5">&#128513; Amazing</option><option value="4">&#128522; Good</option>
+            <option value="3">&#128528; Neutral</option><option value="2">&#128532; Tired</option>
+            <option value="1">&#128534; Burned out</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label for="energyLevel" class="form-label">Energy Level (1–10)</label>
+          <input type="number" class="form-control" id="energyLevel" placeholder="e.g. 7" min="1" max="10" />
+        </div>
+      </div>
+
+      <div class="d-flex align-items-center gap-3 pt-2 border-top" style="border-color:var(--border)!important;">
+        <button type="submit" class="btn btn-submit">&#9989;&nbsp; Save Today's Log</button>
+        <button type="reset"  class="btn btn-reset">&#8635; Reset</button>
+        <span class="ms-auto" style="font-size:0.75rem;color:var(--muted);">&#128274; Data saved to SQLite</span>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/app.js"></script>
+<script src="js/api.js"></script>
+</body>
+</html>

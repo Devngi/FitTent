@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FitTrack – History</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- ✦ THEME BOOTSTRAP: zero flash ✦ -->
+  <script>(function(){var t=sessionStorage.getItem('ft_theme')||'light';document.documentElement.setAttribute('data-theme',t);if(t==='dark')document.documentElement.classList.add('preload-dark');})();</script>
+  <style>
+    /* ── Tokens (Unified Health-Tech Palette) ── */
+    :root {
+      --primary:    #0d9488;
+      --accent:     #14b8a6;
+      --bg:         #f0fdfa;
+      --sidebar-bg: #0f172a;
+      --sidebar-w:  260px;
+      --text:       #1e293b;
+      --muted:      #94a3b8;
+      --border:     #e2e8f0;
+      --card-r:     0.85rem;
+      --card-bg:    #ffffff;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; transition: background 0.3s, color 0.3s; }
+    body.dark-mode { --bg:#0f172a; --text:#e2e8f0; --muted:#94a3b8; --border:#1e293b; --card-bg:#1e293b; background:#0f172a; color:#e2e8f0; }
+    body.dark-mode .table-card { background:#1e293b; border-color:#334155; }
+    body.dark-mode .filter-bar { background:#1e293b; border-color:#334155; }
+    body.dark-mode .form-control, body.dark-mode .form-select { background:#0f172a; border-color:#334155; color:#e2e8f0; }
+    body.dark-mode .topbar-title { color:#e2e8f0; }
+    body.dark-mode .history-table thead tr { background:#1e293b; }
+    body.dark-mode .history-table tbody td { color:#e2e8f0; }
+    body.dark-mode .history-table tbody tr:hover { background:#334155; }
+    body.dark-mode .table-footer { background:#1e293b; color:#94a3b8; }
+
+    /* Sidebar */
+    .sidebar { width: var(--sidebar-w); min-height: 100vh; background: var(--sidebar-bg); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; box-shadow: 4px 0 24px rgba(0,0,0,0.18); }
+    .sidebar-brand { padding: 1.6rem 1.5rem 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .brand-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .brand-icon { width: 38px; height: 38px; background: linear-gradient(135deg, var(--primary), var(--accent)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+    .brand-name { font-size: 1.3rem; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
+    .brand-sub { font-size: 0.65rem; color: rgba(255,255,255,0.4); letter-spacing: 0.05em; text-transform: uppercase; display: block; }
+    .sidebar-nav { padding: 1rem 0; }
+    .nav-section-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 0.8rem 1.5rem 0.4rem; }
+    .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 0.65rem 1.5rem; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.9rem; font-weight: 500; border-left: 3px solid transparent; transition: all 0.18s; }
+    .sidebar-link:hover { color: #fff; background: rgba(255,255,255,0.05); }
+    .sidebar-link.active { color: #fff; background: rgba(13,148,136,0.18); border-left-color: var(--primary); }
+    .sidebar-link .nav-icon { font-size: 1.05rem; width: 20px; text-align: center; }
+    .quote-card { margin: 0.5rem 1rem 1rem; background: linear-gradient(135deg, rgba(13,148,136,0.25), rgba(6,182,212,0.15)); border: 1px solid rgba(13,148,136,0.35); border-radius: var(--card-r); padding: 1rem 1.1rem; }
+    .quote-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 0.5rem; }
+    .quote-text { font-size: 0.82rem; color: rgba(255,255,255,0.8); font-style: italic; line-height: 1.5; }
+    .quote-author { font-size: 0.72rem; color: rgba(255,255,255,0.45); margin-top: 0.4rem; }
+
+    /* Main */
+    .main-content { margin-left: var(--sidebar-w); flex: 1; padding: 2rem 2.5rem; min-height: 100vh; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
+    .topbar-title { font-size: 1.6rem; font-weight: 800; color: var(--text); }
+    .topbar-date { font-size: 0.85rem; color: var(--muted); margin-top: 2px; }
+
+    /* Table card */
+    .table-card { background: #fff; border: 1px solid var(--border); border-radius: var(--card-r); box-shadow: 0 4px 20px rgba(13,148,136,0.08); overflow: hidden; }
+    .table-card-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%); padding: 1.3rem 1.75rem; color: #fff; display: flex; align-items: center; justify-content: space-between; }
+    .table-card-header h5 { font-size: 1.05rem; font-weight: 700; margin: 0; }
+    .table-card-header small { font-size: 0.8rem; opacity: 0.82; }
+
+    /* Filter bar */
+    .filter-bar { padding: 1rem 1.75rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.75rem; background: #fafffe; }
+    .filter-bar .form-control, .filter-bar .form-select {
+      border-color: #d1fae5; background: #f9fffe; font-size: 0.85rem;
+      color: var(--text); border-radius: 0.5rem; max-width: 180px;
+    }
+    .filter-bar .form-control:focus, .filter-bar .form-select:focus {
+      border-color: var(--primary); box-shadow: 0 0 0 3px rgba(13,148,136,0.15);
+    }
+    .filter-label { font-size: 0.78rem; font-weight: 600; color: var(--muted); white-space: nowrap; }
+
+    /* Table */
+    .history-table { width: 100%; border-collapse: collapse; }
+    .history-table thead tr { background: #f0fdfa; }
+    .history-table thead th {
+      padding: 0.85rem 1.2rem; font-size: 0.75rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.07em;
+      color: var(--primary); border-bottom: 2px solid var(--border);
+      white-space: nowrap;
+    }
+    .history-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.12s; }
+    .history-table tbody tr:last-child { border-bottom: none; }
+    .history-table tbody tr:hover { background: #f0fdfa; }
+    .history-table tbody td { padding: 0.9rem 1.2rem; font-size: 0.88rem; color: var(--text); vertical-align: middle; }
+    .td-date { font-weight: 600; color: var(--text); }
+    .td-workout { display: inline-flex; align-items: center; gap: 6px; }
+    .workout-badge { font-size: 0.72rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 2rem; background: rgba(13,148,136,0.1); color: var(--primary); }
+    .td-steps { font-weight: 600; }
+    .steps-goal { color: #10b981; }
+    .steps-low  { color: #f59e0b; }
+    .water-bar-wrap { display: flex; align-items: center; gap: 8px; }
+    .water-bar { height: 6px; width: 80px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .water-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), var(--accent)); }
+    .sleep-pill { display: inline-block; font-size: 0.78rem; font-weight: 600; padding: 0.18rem 0.55rem; border-radius: 2rem; }
+    .sleep-good { background: rgba(16,185,129,0.12); color: #059669; }
+    .sleep-ok   { background: rgba(245,158,11,0.12); color: #d97706; }
+    .sleep-bad  { background: rgba(239,68,68,0.1);   color: #dc2626; }
+    .td-actions { text-align: right; }
+    .btn-icon { background: none; border: 1px solid var(--border); border-radius: 0.4rem; padding: 0.3rem 0.55rem; font-size: 0.8rem; color: var(--muted); cursor: pointer; transition: all 0.15s; }
+    .btn-icon:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* Empty state */
+    .empty-state { text-align: center; padding: 4rem 2rem; color: var(--muted); }
+    .empty-state .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.4; }
+    .empty-state p { font-size: 0.9rem; }
+
+    /* Pagination area */
+    .table-footer { padding: 0.9rem 1.75rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: #fafffe; }
+    .table-footer-info { font-size: 0.78rem; color: var(--muted); }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <a href="index.html" class="brand-logo">
+      <div class="brand-icon">&#128170;</div>
+      <div><span class="brand-name">FitTrack</span><span class="brand-sub">Health Logger</span></div>
+    </a>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Menu</div>
+    <a href="index.html"      class="sidebar-link" data-page="index.html"><span class="nav-icon">&#128200;</span> Dashboard</a>
+    <a href="history.html"    class="sidebar-link" data-page="history.html"><span class="nav-icon">&#128203;</span> History</a>
+    <a href="medication.html" class="sidebar-link" data-page="medication.html"><span class="nav-icon">&#128138;</span> Medication</a>
+    <a href="awards.html"     class="sidebar-link" data-page="awards.html"><span class="nav-icon">&#127942;</span> Awards</a>
+    <a href="settings.html"   class="sidebar-link" data-page="settings.html"><span class="nav-icon">&#9881;&#65039;</span> Settings</a>
+  </nav>
+  <div class="quote-card">
+    <div class="quote-label">&#9889; Daily Motivation</div>
+    <p class="quote-text">"Success is the sum of small efforts, repeated day in and day out."</p>
+    <div class="quote-author">— Robert Collier</div>
+  </div>
+</aside>
+
+<div class="main-content">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">&#128203; Activity History</div>
+      <div class="topbar-date">Your logged entries from the last 30 days.</div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-card-header">
+      <div>
+        <h5>Last Month's Log</h5>
+        <small>All entries are stored and ready for backend integration.</small>
+      </div>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="filter-bar">
+      <span class="filter-label">Filter:</span>
+      <input type="date" id="filterFrom" class="form-control" placeholder="From date" />
+      <input type="date" id="filterTo"   class="form-control" placeholder="To date" />
+      <select id="filterWorkout" class="form-select">
+        <option value="">All Workouts</option>
+        <option>Chest Day</option><option>Back &amp; Biceps</option>
+        <option>Leg Day</option><option>Running</option><option>HIIT</option>
+        <option>Yoga</option><option>Rest / Recovery</option>
+      </select>
+    </div>
+
+    <!-- Table -->
+    <div style="overflow-x:auto;">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Workout</th>
+            <th>Steps</th>
+            <th>Water</th>
+            <th>Sleep</th>
+            <th>Mood</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="historyTableBody">
+          <!-- Rows injected by app.js -->
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <span class="table-footer-info" id="tableFooterInfo">No entries yet.</span>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/app.js"></script>
+<script src="js/api.js"></script>
+</body>
+</html>

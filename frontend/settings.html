@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FitTrack – Settings</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- ✦ THEME BOOTSTRAP: zero flash ✦ -->
+  <script>(function(){var t=sessionStorage.getItem('ft_theme')||'light';document.documentElement.setAttribute('data-theme',t);if(t==='dark')document.documentElement.classList.add('preload-dark');})();</script>
+  <style>
+    /* ── Tokens (Unified Health-Tech Palette) ── */
+    :root {
+      --primary:    #0d9488;
+      --accent:     #14b8a6;
+      --bg:         #f0fdfa;
+      --sidebar-bg: #0f172a;
+      --sidebar-w:  260px;
+      --text:       #1e293b;
+      --muted:      #94a3b8;
+      --border:     #e2e8f0;
+      --card-r:     0.85rem;
+      --card-bg:    #ffffff;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; transition: background 0.3s, color 0.3s; }
+
+    /* Sidebar */
+    .sidebar { width: var(--sidebar-w); min-height: 100vh; background: var(--sidebar-bg); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; box-shadow: 4px 0 24px rgba(0,0,0,0.18); }
+    .sidebar-brand { padding: 1.6rem 1.5rem 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .brand-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .brand-icon { width: 38px; height: 38px; background: linear-gradient(135deg, var(--primary), var(--accent)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+    .brand-name { font-size: 1.3rem; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
+    .brand-sub { font-size: 0.65rem; color: rgba(255,255,255,0.4); letter-spacing: 0.05em; text-transform: uppercase; display: block; }
+    .sidebar-nav { padding: 1rem 0; }
+    .nav-section-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 0.8rem 1.5rem 0.4rem; }
+    .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 0.65rem 1.5rem; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.9rem; font-weight: 500; border-left: 3px solid transparent; transition: all 0.18s; }
+    .sidebar-link:hover { color: #fff; background: rgba(255,255,255,0.05); }
+    .sidebar-link.active { color: #fff; background: rgba(13,148,136,0.18); border-left-color: var(--primary); }
+    .sidebar-link .nav-icon { font-size: 1.05rem; width: 20px; text-align: center; }
+    .quote-card { margin: auto 1rem 1rem; background: linear-gradient(135deg, rgba(13,148,136,0.25), rgba(6,182,212,0.15)); border: 1px solid rgba(13,148,136,0.35); border-radius: var(--card-r); padding: 1rem 1.1rem; }
+    .quote-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 0.5rem; }
+    .quote-text { font-size: 0.82rem; color: rgba(255,255,255,0.8); font-style: italic; line-height: 1.5; }
+    .quote-author { font-size: 0.72rem; color: rgba(255,255,255,0.45); margin-top: 0.4rem; }
+
+    .main-content { margin-left: var(--sidebar-w); flex: 1; padding: 2rem 2.5rem; min-height: 100vh; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
+    .topbar-title { font-size: 1.6rem; font-weight: 800; color: var(--text); }
+    .topbar-date { font-size: 0.85rem; color: var(--muted); margin-top: 2px; }
+
+    /* Settings layout */
+    .settings-layout { display: grid; grid-template-columns: 210px 1fr; gap: 1.5rem; align-items: start; }
+    .settings-nav { background: var(--card-bg, #fff); border: 1px solid var(--border); border-radius: var(--card-r); overflow: hidden; box-shadow: 0 2px 12px rgba(13,148,136,0.06); position: sticky; top: 1rem; }
+    .settings-nav-item { display: flex; align-items: center; gap: 10px; padding: 0.78rem 1.1rem; font-size: 0.85rem; font-weight: 500; color: var(--muted); border-left: 3px solid transparent; transition: all 0.15s; cursor: pointer; user-select: none; }
+    .settings-nav-item:hover { background: var(--bg); color: var(--primary); }
+    .settings-nav-item.active { background: rgba(13,148,136,0.07); color: var(--primary); border-left-color: var(--primary); font-weight: 600; }
+    .settings-nav-item .sn-icon { font-size: 1rem; width: 18px; text-align: center; }
+
+    /* Panels */
+    .settings-panel { display: none; }
+    .settings-panel.active { display: block; }
+
+    /* Cards */
+    .settings-card { background: var(--card-bg, #fff); border: 1px solid var(--border); border-radius: var(--card-r); box-shadow: 0 2px 12px rgba(13,148,136,0.06); overflow: hidden; margin-bottom: 1.25rem; }
+    .settings-card-header { padding: 1.1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+    .settings-card-header h6 { font-size: 0.95rem; font-weight: 700; color: var(--text); margin: 0; }
+    .settings-card-header .sh-icon { font-size: 1.1rem; }
+    .settings-card-body { padding: 1.3rem 1.5rem; }
+    .form-label { font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem; color: var(--text); }
+    .form-control, .form-select { border-color: #d1fae5; background: #f9fffe; font-size: 0.88rem; color: var(--text); border-radius: 0.5rem; }
+    .form-control:focus, .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(13,148,136,0.15); background: #fff; }
+    .form-control::placeholder { color: #94a3b8; }
+    .form-text { font-size: 0.72rem; color: var(--muted); }
+
+    /* Toggles */
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--border); }
+    .toggle-row:last-child { border-bottom: none; }
+    .toggle-info { flex: 1; }
+    .toggle-info .t-label { font-size: 0.88rem; font-weight: 600; color: var(--text); }
+    .toggle-info .t-desc { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+    .form-check-input { width: 2.4em; height: 1.3em; cursor: pointer; flex-shrink: 0; }
+    .form-check-input:checked { background-color: var(--primary); border-color: var(--primary); }
+    .form-check-input:focus { box-shadow: 0 0 0 3px rgba(13,148,136,0.15); }
+
+    /* Range sliders */
+    .range-wrap { margin-bottom: 0.2rem; }
+    .form-range { accent-color: var(--primary); }
+    .range-display { font-size: 0.82rem; font-weight: 700; color: var(--primary); text-align: right; margin-top: 2px; }
+
+    /* Theme selector */
+    .theme-selector { display: flex; gap: 0.75rem; margin-top: 0.5rem; }
+    .theme-btn {
+      flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+      padding: 0.9rem; border-radius: 0.75rem; border: 2px solid var(--border);
+      cursor: pointer; transition: all 0.2s; background: var(--card-bg, #fff);
+      font-size: 0.8rem; font-weight: 600; color: var(--muted);
+    }
+    .theme-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .theme-btn.active { border-color: var(--primary); background: rgba(13,148,136,0.08); color: var(--primary); box-shadow: 0 0 0 3px rgba(13,148,136,0.15); }
+    .theme-btn .theme-icon { font-size: 1.6rem; }
+    .theme-preview { width: 100%; height: 36px; border-radius: 0.4rem; margin-bottom: 0.2rem; }
+    .theme-preview-light { background: linear-gradient(135deg, #f0fdfa 60%, #ccfbf1 100%); border: 1px solid #ccfbf1; }
+    .theme-preview-dark  { background: linear-gradient(135deg, #0f172a 60%, #1e293b 100%); border: 1px solid #334155; }
+
+    /* Data stats */
+    .data-stat { background: var(--bg); border: 1px solid var(--border); border-radius: 0.6rem; padding: 0.9rem 1.1rem; display: flex; align-items: center; justify-content: space-between; }
+    .data-stat-label { font-size: 0.82rem; color: var(--muted); }
+    .data-stat-value { font-size: 1.1rem; font-weight: 800; color: var(--text); }
+
+    /* Danger zone */
+    .danger-card { border-color: #fecaca !important; }
+    .danger-card .settings-card-header { background: #fff7f7; border-color: #fecaca; }
+    .danger-card .settings-card-header h6 { color: #dc2626; }
+    .btn-danger-outline { border: 1.5px solid #fca5a5; background: transparent; color: #dc2626; font-weight: 600; font-size: 0.85rem; padding: 0.55rem 1.2rem; border-radius: 0.5rem; transition: all 0.15s; cursor: pointer; }
+    .btn-danger-outline:hover { background: #dc2626; color: #fff; }
+
+    /* Buttons */
+    .btn-submit { background: linear-gradient(135deg, var(--primary), var(--accent)); border: none; color: #fff; font-weight: 700; font-size: 0.95rem; padding: 0.72rem 2.5rem; border-radius: 0.55rem; transition: opacity 0.2s, transform 0.15s; cursor: pointer; }
+    .btn-submit:hover { opacity: 0.9; transform: translateY(-1px); color: #fff; }
+    .btn-secondary-outline { border: 1.5px solid var(--border); background: transparent; color: var(--muted); font-weight: 600; font-size: 0.9rem; padding: 0.7rem 1.5rem; border-radius: 0.55rem; cursor: pointer; transition: all 0.15s; }
+    .btn-secondary-outline:hover { border-color: var(--primary); color: var(--primary); }
+
+    #settingsAlert { min-height: 0; }
+
+    /* Dark mode overrides for this page */
+    body.dark-mode { --bg:#0f172a; --text:#e2e8f0; --muted:#94a3b8; --border:#1e293b; --card-bg:#1e293b; background: #0f172a; color: #e2e8f0; }
+    body.dark-mode .main-content { background: #0f172a; }
+    body.dark-mode .settings-card,
+    body.dark-mode .settings-nav { background: #1e293b; border-color: #334155; }
+    body.dark-mode .settings-card-header { background: #0f172a; border-color: #334155; }
+    body.dark-mode .settings-card-header h6 { color: #e2e8f0; }
+    body.dark-mode .form-control,
+    body.dark-mode .form-select { background: #0f172a; border-color: #334155; color: #e2e8f0; }
+    body.dark-mode .form-label { color: #e2e8f0; }
+    body.dark-mode .t-label { color: #e2e8f0; }
+    body.dark-mode .data-stat { background: #0f172a; border-color: #334155; }
+    body.dark-mode .data-stat-value { color: #e2e8f0; }
+    body.dark-mode .topbar-title { color: #e2e8f0; }
+    body.dark-mode .toggle-row { border-color: #334155; }
+    body.dark-mode .theme-btn { background: #0f172a; border-color: #334155; color: #94a3b8; }
+    body.dark-mode .theme-btn.active { border-color: var(--primary); background: rgba(13,148,136,0.15); color: #22d3ee; }
+    body.dark-mode .settings-nav-item { color: #94a3b8; }
+    body.dark-mode .settings-nav-item.active { background: rgba(13,148,136,0.12); color: #22d3ee; }
+    body.dark-mode .settings-nav-item:hover { background: rgba(255,255,255,0.04); color: #e2e8f0; }
+  </style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <a href="index.html" class="brand-logo">
+      <div class="brand-icon">&#128170;</div>
+      <div><span class="brand-name">FitTrack</span><span class="brand-sub">Health Logger</span></div>
+    </a>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Menu</div>
+    <a href="index.html"      class="sidebar-link" data-page="index.html"><span class="nav-icon">&#128200;</span> Dashboard</a>
+    <a href="history.html"    class="sidebar-link" data-page="history.html"><span class="nav-icon">&#128203;</span> History</a>
+    <a href="medication.html" class="sidebar-link" data-page="medication.html"><span class="nav-icon">&#128138;</span> Medication</a>
+    <a href="awards.html"     class="sidebar-link" data-page="awards.html"><span class="nav-icon">&#127942;</span> Awards</a>
+    <a href="settings.html"   class="sidebar-link" data-page="settings.html"><span class="nav-icon">&#9881;&#65039;</span> Settings</a>
+  </nav>
+  <div class="quote-card">
+    <div class="quote-label">&#9889; Daily Motivation</div>
+    <p class="quote-text">"The groundwork for all happiness is good health."</p>
+    <div class="quote-author">— Leigh Hunt</div>
+  </div>
+</aside>
+
+<div class="main-content">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">&#9881;&#65039; Settings</div>
+      <div class="topbar-date">Manage your profile, goals, and preferences.</div>
+    </div>
+  </div>
+
+  <div id="settingsAlert"></div>
+
+  <div class="settings-layout">
+    <!-- Left nav -->
+    <nav class="settings-nav" id="settingsNav">
+      <div class="settings-nav-item active" data-tab="profile">  <span class="sn-icon">&#128100;</span> Profile</div>
+      <div class="settings-nav-item"        data-tab="goals">    <span class="sn-icon">&#127919;</span> Goals</div>
+      <div class="settings-nav-item"        data-tab="notif">    <span class="sn-icon">&#128276;</span> Notifications</div>
+      <div class="settings-nav-item"        data-tab="appear">   <span class="sn-icon">&#127774;</span> Appearance</div>
+      <div class="settings-nav-item"        data-tab="data">     <span class="sn-icon">&#128196;</span> Data</div>
+      <div class="settings-nav-item"        data-tab="danger">   <span class="sn-icon">&#9888;&#65039;</span> Danger Zone</div>
+    </nav>
+
+    <!-- Right panels -->
+    <div>
+
+      <!-- ══ PROFILE ══ -->
+      <div class="settings-panel active" id="panel-profile">
+        <div class="settings-card">
+          <div class="settings-card-header"><span class="sh-icon">&#128100;</span><h6>Your Profile</h6></div>
+          <div class="settings-card-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Display Name</label>
+                <input type="text" id="s_name" class="form-control" placeholder="e.g. Alex Kumar" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Date of Birth</label>
+                <input type="date" id="s_dob" class="form-control" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Gender</label>
+                <select id="s_gender" class="form-select">
+                  <option value="">Select&hellip;</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                  <option value="Prefer not to say">Prefer not to say</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Height (cm)</label>
+                <input type="number" id="s_height" class="form-control" placeholder="e.g. 175" min="100" max="250" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Weight (kg)</label>
+                <input type="number" id="s_weight" class="form-control" placeholder="e.g. 70" min="30" max="300" step="0.1" />
+              </div>
+              <div class="col-12">
+                <label class="form-label">Bio / Fitness Goal</label>
+                <textarea id="s_bio" class="form-control" rows="2" placeholder="e.g. Training for a 5K run by December…"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex gap-3"><button class="btn btn-submit" onclick="saveSettings()">&#9989; Save Profile</button></div>
+      </div>
+
+      <!-- ══ GOALS ══ -->
+      <div class="settings-panel" id="panel-goals">
+        <div class="settings-card">
+          <div class="settings-card-header"><span class="sh-icon">&#127919;</span><h6>Daily Goals</h6></div>
+          <div class="settings-card-body">
+            <div class="row g-4">
+              <div class="col-md-6">
+                <label class="form-label">&#128374; Daily Step Goal</label>
+                <div class="range-wrap">
+                  <input type="range" id="s_goalSteps" class="form-range" min="2000" max="20000" step="500" value="10000" />
+                </div>
+                <div class="range-display" id="disp_steps">10,000 steps</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">&#128167; Water Goal</label>
+                <div class="range-wrap">
+                  <input type="range" id="s_goalWater" class="form-range" min="1" max="5" step="0.25" value="3" />
+                </div>
+                <div class="range-display" id="disp_water">3 L</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">&#127769; Sleep Goal</label>
+                <div class="range-wrap">
+                  <input type="range" id="s_goalSleep" class="form-range" min="4" max="12" step="0.5" value="8" />
+                </div>
+                <div class="range-display" id="disp_sleep">8 hrs</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">&#127947; Workout Days / Week</label>
+                <div class="range-wrap">
+                  <input type="range" id="s_goalWorkoutDays" class="form-range" min="1" max="7" step="1" value="4" />
+                </div>
+                <div class="range-display" id="disp_workoutdays">4 days</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex gap-3"><button class="btn btn-submit" onclick="saveSettings()">&#9989; Save Goals</button></div>
+      </div>
+
+      <!-- ══ NOTIFICATIONS ══ -->
+      <div class="settings-panel" id="panel-notif">
+        <div class="settings-card">
+          <div class="settings-card-header"><span class="sh-icon">&#128276;</span><h6>Notifications &amp; Reminders</h6></div>
+          <div class="settings-card-body">
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="t-label">Daily Log Reminder</div>
+                <div class="t-desc">Get reminded to log your activity each day</div>
+              </div>
+              <input id="n_dailyLog" class="form-check-input" type="checkbox" role="switch" />
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="t-label">Medication Reminder</div>
+                <div class="t-desc">Alert for scheduled medications (set time in Medication page)</div>
+              </div>
+              <input id="n_medication" class="form-check-input" type="checkbox" role="switch" />
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="t-label">Hydration Nudges</div>
+                <div class="t-desc">Periodic reminders to drink water</div>
+              </div>
+              <input id="n_hydration" class="form-check-input" type="checkbox" role="switch" />
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="t-label">Weekly Summary</div>
+                <div class="t-desc">Receive a weekly activity report</div>
+              </div>
+              <input id="n_weekly" class="form-check-input" type="checkbox" role="switch" />
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="t-label">Achievement Unlocked</div>
+                <div class="t-desc">Notify when a new badge is earned</div>
+              </div>
+              <input id="n_awards" class="form-check-input" type="checkbox" role="switch" />
+            </div>
+          </div>
+        </div>
+        <div class="d-flex gap-3"><button class="btn btn-submit" onclick="saveSettings()">&#9989; Save Preferences</button></div>
+      </div>
+
+      <!-- ══ APPEARANCE ══ -->
+      <div class="settings-panel" id="panel-appear">
+        <div class="settings-card">
+          <div class="settings-card-header"><span class="sh-icon">&#127774;</span><h6>Appearance</h6></div>
+          <div class="settings-card-body">
+
+            <!-- Light / Dark mode selector -->
+            <label class="form-label mb-2">&#127769; Colour Theme</label>
+            <div class="theme-selector mb-4">
+              <div class="theme-btn active" data-theme="light" onclick="selectTheme(this)">
+                <div class="theme-preview theme-preview-light"></div>
+                <span>☀️ Light</span>
+              </div>
+              <div class="theme-btn" data-theme="dark" onclick="selectTheme(this)">
+                <div class="theme-preview theme-preview-dark"></div>
+                <span>🌙 Dark</span>
+              </div>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Language</label>
+                <select id="s_lang" class="form-select">
+                  <option value="en">🇬🇧 English</option>
+                  <option value="hi">🇮🇳 Hindi</option>
+                  <option value="gu">🇮🇳 Gujarati</option>
+                  <option value="es">🇪🇸 Spanish</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Date Format</label>
+                <select id="s_dateFormat" class="form-select">
+                  <option value="DD Mon YYYY">DD Mon YYYY &nbsp;(15 Jul 2026)</option>
+                  <option value="MM/DD/YYYY">MM/DD/YYYY &nbsp;(07/15/2026)</option>
+                  <option value="YYYY-MM-DD">YYYY-MM-DD &nbsp;(2026-07-15)</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Units</label>
+                <select id="s_units" class="form-select">
+                  <option value="metric">Metric (kg, cm, L)</option>
+                  <option value="imperial">Imperial (lbs, ft, oz)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex gap-3">
+          <button class="btn btn-submit" onclick="saveSettings()">&#9989; Save Appearance</button>
+          <small class="d-flex align-items-center text-muted" style="font-size:0.75rem;">Theme applies to all pages instantly.</small>
+        </div>
+      </div>
+
+      <!-- ══ DATA ══ -->
+      <div class="settings-panel" id="panel-data">
+        <div class="settings-card">
+          <div class="settings-card-header"><span class="sh-icon">&#128196;</span><h6>Your Data Summary</h6></div>
+          <div class="settings-card-body">
+            <div class="row g-3 mb-3">
+              <div class="col-md-4">
+                <div class="data-stat">
+                  <div class="data-stat-label">Total Log Entries</div>
+                  <div class="data-stat-value" id="ds_totalLogs">—</div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="data-stat">
+                  <div class="data-stat-label">Avg Daily Steps</div>
+                  <div class="data-stat-value" id="ds_avgSteps">—</div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="data-stat">
+                  <div class="data-stat-label">Avg Sleep</div>
+                  <div class="data-stat-value" id="ds_avgSleep">—</div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="data-stat">
+                  <div class="data-stat-label">Avg Water Intake</div>
+                  <div class="data-stat-value" id="ds_avgWater">—</div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="data-stat">
+                  <div class="data-stat-label">Most Logged Workout</div>
+                  <div class="data-stat-value" id="ds_topWorkout">—</div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="data-stat">
+                  <div class="data-stat-label">Storage</div>
+                  <div class="data-stat-value" id="ds_storage">SQLite DB</div>
+                </div>
+              </div>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+              <button class="btn btn-submit" onclick="exportData()">&#128229; Export as JSON</button>
+              <button class="btn btn-secondary-outline" onclick="importData()">&#128228; Import JSON</button>
+              <input type="file" id="importFileInput" accept=".json" style="display:none" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ DANGER ZONE ══ -->
+      <div class="settings-panel" id="panel-danger">
+        <div class="settings-card danger-card">
+          <div class="settings-card-header"><span class="sh-icon">&#9888;&#65039;</span><h6>Danger Zone</h6></div>
+          <div class="settings-card-body">
+            <div class="d-flex align-items-center justify-content-between mb-3 pb-3" style="border-bottom:1px solid #fecaca;">
+              <div>
+                <div style="font-size:0.88rem;font-weight:600;color:#dc2626;">Clear Activity Logs</div>
+                <div style="font-size:0.75rem;color:var(--muted);margin-top:2px;">Permanently deletes all dashboard log entries.</div>
+              </div>
+              <button class="btn btn-danger-outline" onclick="clearActivityLogs()">&#128465; Clear Logs</button>
+            </div>
+            <div class="d-flex align-items-center justify-content-between mb-3 pb-3" style="border-bottom:1px solid #fecaca;">
+              <div>
+                <div style="font-size:0.88rem;font-weight:600;color:#dc2626;">Clear Medication Data</div>
+                <div style="font-size:0.75rem;color:var(--muted);margin-top:2px;">Resets all saved medication checkboxes and notes.</div>
+              </div>
+              <button class="btn btn-danger-outline" onclick="clearMedData()">&#128465; Clear Meds</button>
+            </div>
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <div style="font-size:0.88rem;font-weight:600;color:#dc2626;">Reset All Data</div>
+                <div style="font-size:0.75rem;color:var(--muted);margin-top:2px;">Wipes all FitTrack data from SQLite. Cannot be undone.</div>
+              </div>
+              <button class="btn btn-danger-outline" onclick="resetAllData()">&#9888;&#65039; Reset Everything</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /panels -->
+  </div><!-- /settings-layout -->
+</div><!-- /main-content -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/app.js"></script>
+<script src="js/api.js"></script>
+<script>
+/** Called when a theme button is clicked — applies immediately on this page
+ *  and caches to sessionStorage so other pages see it on next load. */
+function selectTheme(btn) {
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const theme = btn.dataset.theme;
+  // Write to sessionStorage so all pages apply the right theme instantly
+  sessionStorage.setItem('ft_theme', theme);
+  if (theme === 'dark') {
+    document.body.classList.add('dark-mode');
+    document.documentElement.setAttribute('data-theme', 'dark');
+  } else {
+    document.body.classList.remove('dark-mode');
+    document.documentElement.setAttribute('data-theme', 'light');
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FitTrack – Awards</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
+  <!-- ✦ THEME BOOTSTRAP: zero flash ✦ -->
+  <script>(function(){var t=sessionStorage.getItem('ft_theme')||'light';document.documentElement.setAttribute('data-theme',t);if(t==='dark')document.documentElement.classList.add('preload-dark');})();</script>
+  <style>
+    /* ── Tokens (Unified Health-Tech Palette) ── */
+    :root {
+      --primary:    #0d9488;
+      --accent:     #14b8a6;
+      --bg:         #f0fdfa;
+      --sidebar-bg: #0f172a;
+      --sidebar-w:  260px;
+      --text:       #1e293b;
+      --muted:      #94a3b8;
+      --border:     #e2e8f0;
+      --card-r:     0.85rem;
+      --card-bg:    #ffffff;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; transition: background 0.3s, color 0.3s; }
+    body.dark-mode { --bg:#0f172a; --text:#e2e8f0; --muted:#94a3b8; --border:#1e293b; --card-bg:#1e293b; background:#0f172a; color:#e2e8f0; }
+    body.dark-mode .badge-card { background:#1e293b !important; border-color:#334155 !important; }
+    body.dark-mode .badge-card .badge-name { color:#e2e8f0; }
+    body.dark-mode .badge-card .badge-desc { color:#94a3b8; }
+    body.dark-mode .topbar-title { color:#e2e8f0; }
+
+    /* Sidebar */
+    .sidebar { width: var(--sidebar-w); min-height: 100vh; background: var(--sidebar-bg); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; box-shadow: 4px 0 24px rgba(0,0,0,0.18); }
+    .sidebar-brand { padding: 1.6rem 1.5rem 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .brand-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .brand-icon { width: 38px; height: 38px; background: linear-gradient(135deg, var(--primary), var(--accent)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+    .brand-name { font-size: 1.3rem; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
+    .brand-sub { font-size: 0.65rem; color: rgba(255,255,255,0.4); letter-spacing: 0.05em; text-transform: uppercase; display: block; }
+    .sidebar-nav { padding: 1rem 0; }
+    .nav-section-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 0.8rem 1.5rem 0.4rem; }
+    .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 0.65rem 1.5rem; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.9rem; font-weight: 500; border-left: 3px solid transparent; transition: all 0.18s; }
+    .sidebar-link:hover { color: #fff; background: rgba(255,255,255,0.05); }
+    .sidebar-link.active { color: #fff; background: rgba(13,148,136,0.18); border-left-color: var(--primary); }
+    .sidebar-link .nav-icon { font-size: 1.05rem; width: 20px; text-align: center; }
+    .quote-card { margin: 0.5rem 1rem 1rem; background: linear-gradient(135deg, rgba(13,148,136,0.25), rgba(6,182,212,0.15)); border: 1px solid rgba(13,148,136,0.35); border-radius: var(--card-r); padding: 1rem 1.1rem; }
+    .quote-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 0.5rem; }
+    .quote-text { font-size: 0.82rem; color: rgba(255,255,255,0.8); font-style: italic; line-height: 1.5; }
+    .quote-author { font-size: 0.72rem; color: rgba(255,255,255,0.45); margin-top: 0.4rem; }
+
+    /* Main */
+    .main-content { margin-left: var(--sidebar-w); flex: 1; padding: 2rem 2.5rem; min-height: 100vh; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
+    .topbar-title { font-size: 1.6rem; font-weight: 800; color: var(--text); }
+    .topbar-date { font-size: 0.85rem; color: var(--muted); margin-top: 2px; }
+
+    /* Progress summary bar */
+    .progress-summary { background: #fff; border: 1px solid var(--border); border-radius: var(--card-r); padding: 1.3rem 1.75rem; margin-bottom: 1.75rem; display: flex; align-items: center; justify-content: space-between; gap: 2rem; box-shadow: 0 2px 12px rgba(13,148,136,0.07); }
+    .ps-stat { text-align: center; }
+    .ps-value { font-size: 1.6rem; font-weight: 800; color: var(--text); line-height: 1; }
+    .ps-label { font-size: 0.75rem; color: var(--muted); margin-top: 3px; }
+    .ps-divider { width: 1px; height: 40px; background: var(--border); }
+    .ps-bar-wrap { flex: 1; }
+    .ps-bar-label { font-size: 0.78rem; font-weight: 600; color: var(--text); margin-bottom: 0.4rem; }
+    .ps-bar { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+    .ps-bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--primary), var(--accent)); width: 25%; }
+    .ps-bar-note { font-size: 0.72rem; color: var(--muted); margin-top: 0.35rem; }
+
+    /* Section title */
+    .section-title { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; margin-bottom: 1.25rem; }
+
+    /* Achievement grid */
+    .awards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); gap: 1.25rem; margin-bottom: 2rem; }
+
+    /* ────────────────────────────────────────
+       BADGE CARD — BASE (UNLOCKED)
+    ─────────────────────────────────────── */
+    .badge-card {
+      background: #fff;
+      border: 2px solid transparent;
+      border-radius: var(--card-r);
+      padding: 1.8rem 1.2rem 1.4rem;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(13,148,136,0.12);
+      transition: transform 0.22s cubic-bezier(.34,1.56,.64,1), box-shadow 0.22s, border-color 0.22s;
+      position: relative;
+      overflow: hidden;
+      cursor: default;
+    }
+    /* Vibrant top stripe — overridden per accent below */
+    .badge-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+    }
+    .badge-card:hover {
+      transform: translateY(-6px) scale(1.02);
+      box-shadow: 0 16px 40px rgba(13,148,136,0.22);
+      border-color: rgba(13,148,136,0.35);
+    }
+
+    /* ── Unlocked icon ring ── */
+    .badge-card .badge-icon-wrap {
+      position: relative;
+      width: 80px; height: 80px;
+      margin: 0 auto 1.1rem;
+      border-radius: 50%;
+      /* default teal glow — overridden per accent */
+      background: linear-gradient(135deg, #ccfbf1, #a7f3d0);
+      border: 3px solid #0d9488;
+      box-shadow: 0 0 0 6px rgba(13,148,136,0.12), 0 6px 20px rgba(13,148,136,0.25);
+      display: flex; align-items: center; justify-content: center;
+      transition: box-shadow 0.22s;
+    }
+    .badge-card:hover .badge-icon-wrap {
+      box-shadow: 0 0 0 8px rgba(13,148,136,0.18), 0 8px 28px rgba(13,148,136,0.35);
+    }
+    .badge-card .badge-icon-wrap i {
+      font-size: 2.1rem;
+      background: linear-gradient(135deg, #0d9488, #06b6d4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Per-badge accent overrides — each badge type gets its own color story */
+    .badge-card[data-accent="teal"] { --ba-light:#ccfbf1; --ba-ring:#0d9488; --ba-glow:rgba(13,148,136,0.2); --ba-grad:"135deg,#0d9488,#06b6d4"; }
+    .badge-card[data-accent="green"] .badge-icon-wrap { background:linear-gradient(135deg,#d1fae5,#a7f3d0); border-color:#10b981; box-shadow:0 0 0 6px rgba(16,185,129,.12),0 6px 20px rgba(16,185,129,.25); }
+    .badge-card[data-accent="green"] .badge-icon-wrap i { background:linear-gradient(135deg,#059669,#10b981); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+    .badge-card[data-accent="green"]::before { background:linear-gradient(90deg,#10b981,#34d399); }
+    .badge-card[data-accent="green"]:hover { box-shadow:0 16px 40px rgba(16,185,129,.22); border-color:rgba(16,185,129,.35); }
+    .badge-card[data-accent="blue"] .badge-icon-wrap { background:linear-gradient(135deg,#dbeafe,#bfdbfe); border-color:#3b82f6; box-shadow:0 0 0 6px rgba(59,130,246,.12),0 6px 20px rgba(59,130,246,.25); }
+    .badge-card[data-accent="blue"] .badge-icon-wrap i { background:linear-gradient(135deg,#2563eb,#3b82f6); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+    .badge-card[data-accent="blue"]::before { background:linear-gradient(90deg,#3b82f6,#60a5fa); }
+    .badge-card[data-accent="blue"]:hover { box-shadow:0 16px 40px rgba(59,130,246,.22); border-color:rgba(59,130,246,.35); }
+    .badge-card[data-accent="purple"] .badge-icon-wrap { background:linear-gradient(135deg,#ede9fe,#ddd6fe); border-color:#8b5cf6; box-shadow:0 0 0 6px rgba(139,92,246,.12),0 6px 20px rgba(139,92,246,.25); }
+    .badge-card[data-accent="purple"] .badge-icon-wrap i { background:linear-gradient(135deg,#7c3aed,#8b5cf6); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+    .badge-card[data-accent="purple"]::before { background:linear-gradient(90deg,#8b5cf6,#a78bfa); }
+    .badge-card[data-accent="purple"]:hover { box-shadow:0 16px 40px rgba(139,92,246,.22); border-color:rgba(139,92,246,.35); }
+    .badge-card[data-accent="rose"] .badge-icon-wrap { background:linear-gradient(135deg,#ffe4e6,#fecdd3); border-color:#f43f5e; box-shadow:0 0 0 6px rgba(244,63,94,.12),0 6px 20px rgba(244,63,94,.25); }
+    .badge-card[data-accent="rose"] .badge-icon-wrap i { background:linear-gradient(135deg,#e11d48,#f43f5e); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+    .badge-card[data-accent="rose"]::before { background:linear-gradient(90deg,#f43f5e,#fb7185); }
+    .badge-card[data-accent="rose"]:hover { box-shadow:0 16px 40px rgba(244,63,94,.22); border-color:rgba(244,63,94,.35); }
+    .badge-card[data-accent="amber"] .badge-icon-wrap { background:linear-gradient(135deg,#fef9c3,#fde68a); border-color:#f59e0b; box-shadow:0 0 0 6px rgba(245,158,11,.12),0 6px 20px rgba(245,158,11,.25); }
+    .badge-card[data-accent="amber"] .badge-icon-wrap i { background:linear-gradient(135deg,#d97706,#f59e0b); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+    .badge-card[data-accent="amber"]::before { background:linear-gradient(90deg,#f59e0b,#fbbf24); }
+    .badge-card[data-accent="amber"]:hover { box-shadow:0 16px 40px rgba(245,158,11,.22); border-color:rgba(245,158,11,.35); }
+    .badge-card[data-accent="cyan"] .badge-icon-wrap { background:linear-gradient(135deg,#cffafe,#a5f3fc); border-color:#06b6d4; box-shadow:0 0 0 6px rgba(6,182,212,.12),0 6px 20px rgba(6,182,212,.25); }
+    .badge-card[data-accent="cyan"] .badge-icon-wrap i { background:linear-gradient(135deg,#0891b2,#06b6d4); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+    .badge-card[data-accent="cyan"]::before { background:linear-gradient(90deg,#06b6d4,#22d3ee); }
+    .badge-card[data-accent="cyan"]:hover { box-shadow:0 16px 40px rgba(6,182,212,.22); border-color:rgba(6,182,212,.35); }
+
+    .badge-card .badge-name { font-size: 0.93rem; font-weight: 700; color: var(--text); margin-bottom: 0.3rem; }
+    .badge-card .badge-desc { font-size: 0.76rem; color: var(--muted); line-height: 1.45; margin-bottom: 0.85rem; }
+    .badge-card .badge-earned {
+      font-size: 0.69rem; font-weight: 700;
+      color: #0d9488;
+      background: #ccfbf1;
+      border: 1px solid #99f6e4;
+      padding: 0.25rem 0.8rem;
+      border-radius: 2rem;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+
+    /* ────────────────────────────────────────
+       BADGE CARD — LOCKED  (tasteful greyscale)
+    ─────────────────────────────────────── */
+    .badge-card.locked {
+      background: #f8fafc;
+      border-color: #e2e8f0;
+      box-shadow: none;
+      opacity: 0.72;
+      filter: grayscale(0.6);
+    }
+    .badge-card.locked::before { background: linear-gradient(90deg,#cbd5e1,#e2e8f0); }
+    .badge-card.locked:hover {
+      transform: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      border-color: #cbd5e1;
+      opacity: 0.82;
+      filter: grayscale(0.4);
+    }
+
+    /* ── Locked icon ring ── */
+    .badge-card.locked .badge-icon-wrap {
+      background: #f1f5f9;
+      border: 3px solid #cbd5e1;
+      box-shadow: none;
+    }
+    .badge-card.locked .badge-icon-wrap i {
+      font-size: 2.1rem;
+      background: none;
+      -webkit-text-fill-color: #94a3b8;
+      color: #94a3b8;
+    }
+    /* Crisp padlock badge in corner */
+    .badge-card.locked .badge-icon-wrap::after {
+      content: '\f023'; /* fa-lock */
+      font-family: 'Font Awesome 6 Free'; font-weight: 900;
+      font-size: 0.7rem; color: #fff;
+      background: linear-gradient(135deg,#64748b,#94a3b8);
+      border-radius: 50%; width: 24px; height: 24px;
+      display: flex; align-items: center; justify-content: center;
+      position: absolute; bottom: -3px; right: -3px;
+      border: 2px solid #f8fafc;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    .badge-card.locked .badge-name { color: #94a3b8; }
+    .badge-card.locked .badge-desc { color: #cbd5e1; }
+    .badge-card.locked .lock-tag {
+      font-size: 0.69rem; font-weight: 600; color: #94a3b8;
+      background: #f1f5f9; border: 1px solid #e2e8f0;
+      padding: 0.25rem 0.8rem; border-radius: 2rem;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+
+    /* Dark mode overrides for badge cards */
+    body.dark-mode .badge-card { background: #1e293b; border-color: #334155; }
+    body.dark-mode .badge-card .badge-name { color: #e2e8f0; }
+    body.dark-mode .badge-card .badge-desc { color: #94a3b8; }
+    body.dark-mode .badge-card.locked { background: #0f172a; border-color: #1e293b; }
+    body.dark-mode .badge-card.locked .lock-tag { background:#1e293b; border-color:#334155; }
+    body.dark-mode .badge-card.locked .badge-icon-wrap::after { border-color:#0f172a; }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <a href="index.html" class="brand-logo">
+      <div class="brand-icon">&#128170;</div>
+      <div><span class="brand-name">FitTrack</span><span class="brand-sub">Health Logger</span></div>
+    </a>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Menu</div>
+    <a href="index.html"      class="sidebar-link" data-page="index.html"><span class="nav-icon">&#128200;</span> Dashboard</a>
+    <a href="history.html"    class="sidebar-link" data-page="history.html"><span class="nav-icon">&#128203;</span> History</a>
+    <a href="medication.html" class="sidebar-link" data-page="medication.html"><span class="nav-icon">&#128138;</span> Medication</a>
+    <a href="awards.html"     class="sidebar-link" data-page="awards.html"><span class="nav-icon">&#127942;</span> Awards</a>
+    <a href="settings.html"   class="sidebar-link" data-page="settings.html"><span class="nav-icon">&#9881;&#65039;</span> Settings</a>
+  </nav>
+  <div class="quote-card">
+    <div class="quote-label">&#9889; Daily Motivation</div>
+    <p class="quote-text">"Champions keep playing until they get it right."</p>
+    <div class="quote-author">— Billie Jean King</div>
+  </div>
+</aside>
+
+<div class="main-content">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">&#127942; Consistency Awards</div>
+      <div class="topbar-date">Your achievement collection. Keep logging to unlock more!</div>
+    </div>
+  </div>
+
+  <!-- Progress summary -->
+  <div class="progress-summary">
+    <div class="ps-stat"><div class="ps-value" id="psUnlocked">0</div><div class="ps-label">Unlocked</div></div>
+    <div class="ps-divider"></div>
+    <div class="ps-stat"><div class="ps-value" id="psLocked">12</div><div class="ps-label">Locked</div></div>
+    <div class="ps-divider"></div>
+    <div class="ps-stat"><div class="ps-value">12</div><div class="ps-label">Total</div></div>
+    <div class="ps-divider"></div>
+    <div class="ps-bar-wrap">
+      <div class="ps-bar-label">Overall Progress</div>
+      <div class="ps-bar"><div class="ps-bar-fill" id="psBarFill" style="width:0%"></div></div>
+      <div class="ps-bar-note" id="psBarNote">0 of 12 badges earned &nbsp;&middot;&nbsp; Keep going!</div>
+    </div>
+  </div>
+
+  <!-- Unlocked badges -->
+  <p class="section-title" id="unlockedTitle">&#9989; Unlocked Achievements</p>
+  <div class="awards-grid" id="unlockedGrid">
+
+    <div class="badge-card locked" data-badge="streak7" data-accent="amber">
+      <div class="badge-icon-wrap"><i class="fa-solid fa-fire-flame-curved"></i></div>
+      <div class="badge-name">7-Day Streak</div>
+      <div class="badge-desc">Logged activity every day for 7 days in a row.</div>
+      <span class="badge-status-tag lock-tag"><i class="fa-solid fa-lock"></i> Locked</span>
+    </div>
+
+    <div class="badge-card locked" data-badge="hydrationHero" data-accent="cyan">
+      <div class="badge-icon-wrap"><i class="fa-solid fa-droplet"></i></div>
+      <div class="badge-name">Hydration Hero</div>
+      <div class="badge-desc">Drank 3 L or more of water for 5 consecutive days.</div>
+      <span class="badge-status-tag lock-tag"><i class="fa-solid fa-lock"></i> Locked</span>
+    </div>
+
+    <div class="badge-card locked" data-badge="stepMaster" data-accent="green">
+      <div class="badge-icon-wrap"><i class="fa-solid fa-person-walking"></i></div>
+      <div class="badge-name">Step Master</div>
+      <div class="badge-desc">Hit the 10,000-step goal at least once.</div>
+      <span class="badge-status-tag lock-tag"><i class="fa-solid fa-lock"></i> Locked</span>
+    </div>
+
+    <div class="badge-card locked" data-badge="sleepChampion" data-accent="blue">
+      <div class="badge-icon-wrap"><i class="fa-solid fa-bed"></i></div>
+      <div class="badge-name">Sleep Champion</div>
+      <div class="badge-desc">Sleep 8+ hours for 3 consecutive nights.</div>
+      <span class="badge-status-tag lock-tag"><i class="fa-solid fa-lock"></i> Locked</span>
+    </div>
+
+    <div class="badge-card locked" data-badge="warrior30" data-accent="teal">
+      <div class="badge-icon-wrap"><i class="fa-solid fa-calendar-days"></i></div>
+      <div class="badge-name">30-Day Warrior</div>
+      <div class="badge-desc">Log activity every single day for a full month.</div>
+      <span class="badge-status-tag lock-tag"><i class="fa-solid fa-lock"></i> Locked</span>
+    </div>
+
+    <div class="badge-card locked" data-badge="gymRat" data-accent="purple">
+      <div class="badge-icon-wrap"><i class="fa-solid fa-dumbbell"></i></div>
+      <div class="badge-name">Gym Rat</div>
+      <div class="badge-desc">Complete 20 strength-training sessions.</div>
+      <span class="badge-status-tag lock-tag"><i class="fa-solid fa-lock"></i> Locked</span>
+    </div>
+
+    <div class="badge-card locked" data-badge="medCompliant" data-accent="rose">
+      <div class="badge-icon-wrap"><i class="fa-solid fa-pills"></i></div>
+      <div class="badge-name">Med Compliant</div>
+      <div class="badge-desc">Log medications on time for 7 consecutive days.</div>
+      <span class="badge-status-tag lock-tag"><i class="fa-solid fa-lock"></i> Locked</span>
+    </div>
+
+    <div class="badge-card locked" data-badge="earlyBird" data-accent="amber">
+      <div class="badge-icon-wrap"><i class="fa-solid fa-sun"></i></div>
+      <div class="badge-name">Early Bird</div>
+      <div class="badge-desc">Log a workout before 7 AM five times.</div>
+      <span class="badge-status-tag lock-tag"><i class="fa-solid fa-lock"></i> Locked</span>
+    </div>
+
+    <div class="badge-card locked" data-badge="cardioKing" data-accent="rose">
+      <div class="badge-icon-wrap"><i class="fa-solid fa-heart-pulse"></i></div>
+      <div class="badge-name">Cardio King</div>
+      <div class="badge-desc">Complete 10 cardio sessions in a single month.</div>
+      <span class="badge-status-tag lock-tag"><i class="fa-solid fa-lock"></i> Locked</span>
+    </div>
+
+    <div class="badge-card locked" data-badge="mindBody" data-accent="purple">
+      <div class="badge-icon-wrap"><i class="fa-solid fa-brain"></i></div>
+      <div class="badge-name">Mind &amp; Body</div>
+      <div class="badge-desc">Log mood as "Amazing" or "Good" for 10 days.</div>
+      <span class="badge-status-tag lock-tag"><i class="fa-solid fa-lock"></i> Locked</span>
+    </div>
+
+    <div class="badge-card locked" data-badge="calorieCruncher" data-accent="green">
+      <div class="badge-icon-wrap"><i class="fa-solid fa-utensils"></i></div>
+      <div class="badge-name">Calorie Cruncher</div>
+      <div class="badge-desc">Log nutrition data for 14 consecutive days.</div>
+      <span class="badge-status-tag lock-tag"><i class="fa-solid fa-lock"></i> Locked</span>
+    </div>
+
+    <div class="badge-card locked" data-badge="perfectWeek" data-accent="cyan">
+      <div class="badge-icon-wrap"><i class="fa-solid fa-star"></i></div>
+      <div class="badge-name">Perfect Week</div>
+      <div class="badge-desc">Hit steps, water, and sleep goals every day of a week.</div>
+      <span class="badge-status-tag lock-tag"><i class="fa-solid fa-lock"></i> Locked</span>
+    </div>
+
+  </div>
+
+  <!-- Locked section title kept for layout, JS will hide it if all unlocked -->
+  <p class="section-title" id="lockedTitle" style="display:none;">&#128274; Locked Achievements</p>
+  <div class="awards-grid" id="lockedGrid"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/app.js"></script>
+<script src="js/api.js"></script>
+</body>
+</html>
