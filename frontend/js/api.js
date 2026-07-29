@@ -13,7 +13,7 @@
 
 'use strict';
 
-const API_BASE = 'http://127.0.0.1:5001/api';
+const API_BASE = 'http://127.0.0.1:5002/api';
 
 /* ── Global profile cache ──────────────────────────────────── */
 window.FT = window.FT || { profile: null };

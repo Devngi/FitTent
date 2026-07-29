@@ -109,4 +109,4 @@ def api_get_stats():
 if __name__ == "__main__":
     db.init_db()
     print("[FitTrack] Server running → http://127.0.0.1:5001")
-    app.run(debug=True, port=5001)
+    app.run(debug=True, port=5002)
