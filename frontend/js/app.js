@@ -125,84 +125,217 @@ function initNavigation() {
    1. DASHBOARD  (index.html)
 ════════════════════════════════════════════ */
 
+/**
+ * Returns today's ISO date string: "YYYY-MM-DD"
+ */
+function getTodayISO() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+/**
+ * Finds the most-recent log entry for today in GLOBAL_LOGS.
+ * Returns the log object or null.
+ */
+function findTodayLog() {
+  const today = getTodayISO();
+  // GLOBAL_LOGS is sorted oldest-first by api.js; scan from the end for speed
+  for (let i = GLOBAL_LOGS.length - 1; i >= 0; i--) {
+    const d = String(GLOBAL_LOGS[i].date ?? GLOBAL_LOGS[i].log_date ?? '').slice(0, 10);
+    if (d === today) return GLOBAL_LOGS[i];
+  }
+  return null;
+}
+
+/**
+ * Pre-fills all dashboard form inputs with values from an existing log object.
+ * Also swaps button text + form subtitle into "Update" mode.
+ */
+function prefillDashboardForm(log) {
+  if (!log) return;
+
+  /* ── Form inputs ── */
+  const setVal = (id, v) => { const el = document.getElementById(id); if (el && v != null) el.value = v; };
+
+  setVal('workoutType',     log.workout  ?? log.workout_type);
+  setVal('workoutDuration', log.duration ?? log.workout_duration);
+  setVal('workoutIntensity',log.intensity?? log.workout_intensity);
+  setVal('workoutNotes',    log.notes    ?? log.workout_notes);
+  setVal('dailySteps',      log.steps);
+  setVal('waterIntake',     log.water    ?? log.water_intake);
+  setVal('sleepHours',      log.sleep    ?? log.sleep_hours);
+  setVal('moodLevel',       log.mood);
+  setVal('energyLevel',     log.energy   ?? log.energy_level);
+
+  /* ── Swap button text ── */
+  const submitBtn = document.querySelector('#activityForm .btn-submit');
+  if (submitBtn) {
+    submitBtn.innerHTML = '✏️&nbsp; Update Today\'s Log';
+    submitBtn.style.background = 'linear-gradient(135deg,#6366f1,#8b5cf6)';  // purple = edit mode
+  }
+
+  /* ── Swap form card subtitle ── */
+  const subtitle = document.getElementById('formCardSubtitle');
+  if (subtitle) subtitle.textContent = 'You already logged today — edit your values and click Update.';
+
+  /* ── Visual badge on header ── */
+  const header = document.querySelector('.form-card-header h5');
+  if (header && !document.getElementById('editModeBadge')) {
+    const badge = document.createElement('span');
+    badge.id = 'editModeBadge';
+    badge.innerHTML = ' <span style="font-size:0.7rem;font-weight:600;background:rgba(255,255,255,0.22);padding:0.15rem 0.55rem;border-radius:1rem;">EDIT MODE</span>';
+    header.appendChild(badge);
+  }
+}
+
 function initDashboard() {
   const form = document.getElementById('activityForm');
-  const alertBox = document.getElementById('formAlert');
 
   setDynamicGreeting();
   initMotivationSlider();
   refreshStatCards();
 
+  /* ── Initialization: check for today's existing log ──────────────────
+     GLOBAL_LOGS may already be populated if api.js loaded first;
+     if it's empty we set up a one-time listener to pre-fill when data arrives. */
+  let todayLog = findTodayLog();
+  if (todayLog) {
+    prefillDashboardForm(todayLog);
+  } else {
+    // api.js fires 'ft:logsLoaded' after GLOBAL_LOGS is populated
+    document.addEventListener('ft:logsLoaded', () => {
+      todayLog = findTodayLog();
+      if (todayLog) prefillDashboardForm(todayLog);
+    }, { once: true });
+  }
+
+  /* ── Submit: Save (POST) or Update (PUT) ── */
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     clearAlert();
 
-    const steps = parseFloat(document.getElementById('dailySteps').value);
-    const water = parseFloat(document.getElementById('waterIntake').value);
-    const sleep = parseFloat(document.getElementById('sleepHours').value);
-    const workout = document.getElementById('workoutType').value;
-    const duration = document.getElementById('workoutDuration').value;
-    const intensity = document.getElementById('workoutIntensity').value;
-    const notes = document.getElementById('workoutNotes').value.trim();
-    const mood = document.getElementById('moodLevel').value;
-    const energy = document.getElementById('energyLevel').value;
-
-    const errors = [];
-    if (!isNaN(steps) && steps < 0) errors.push('Daily Steps cannot be negative.');
-    if (!isNaN(water) && water < 0) errors.push('Water Intake cannot be negative.');
-    if (!isNaN(sleep) && sleep < 0) errors.push('Sleep Hours cannot be negative.');
-    if (!workout) errors.push('Please select a Gym Workout type.');
-
-    if (errors.length > 0) { showAlert('danger', errors); return; }
-
+    /* Collect form values */
     const toNum = (v) => (v !== '' && v !== null && isFinite(Number(v))) ? Number(v) : null;
 
-    const today = new Date();
+    const workout   = document.getElementById('workoutType').value;
+    const duration  = document.getElementById('workoutDuration').value;
+    const intensity = document.getElementById('workoutIntensity').value;
+    const notes     = document.getElementById('workoutNotes').value.trim();
+    const steps     = document.getElementById('dailySteps').value;
+    const water     = document.getElementById('waterIntake').value;
+    const sleep     = document.getElementById('sleepHours').value;
+    const mood      = document.getElementById('moodLevel').value;
+    const energy    = document.getElementById('energyLevel').value;
+
+    /* Validation */
+    const errors = [];
+    if (!isNaN(toNum(steps)) && toNum(steps) !== null && toNum(steps) < 0) errors.push('Daily Steps cannot be negative.');
+    if (!isNaN(toNum(water)) && toNum(water) !== null && toNum(water) < 0) errors.push('Water Intake cannot be negative.');
+    if (!isNaN(toNum(sleep)) && toNum(sleep) !== null && toNum(sleep) < 0) errors.push('Sleep Hours cannot be negative.');
+    if (!workout) errors.push('Please select a Gym Workout type.');
+    if (errors.length > 0) { showAlert('danger', errors); return; }
+
     const entry = {
-      date: today.toISOString().slice(0, 10),
-      workout: workout || null,
-      duration: toNum(duration),
+      date:      getTodayISO(),
+      workout:   workout   || null,
+      duration:  toNum(duration),
       intensity: intensity || null,
-      notes: notes || null,
-      steps: toNum(document.getElementById('dailySteps').value),
-      water: toNum(document.getElementById('waterIntake').value),
-      sleep: toNum(document.getElementById('sleepHours').value),
-      mood: mood || null,
-      energy: toNum(energy),
+      notes:     notes     || null,
+      steps:     toNum(steps),
+      water:     toNum(water),
+      sleep:     toNum(sleep),
+      mood:      mood      || null,
+      energy:    toNum(energy),
     };
 
-    /* Save to SQLite via API */
-    if (typeof apiSaveLog === 'function') {
-      const saved = await apiSaveLog(entry);
-      if (saved) {
-        // Normalise saved row and cache in GLOBAL_LOGS
-        GLOBAL_LOGS = [{
-          id: saved.id, date: saved.log_date,
-          workout: saved.workout_type, duration: saved.workout_duration,
-          intensity: saved.workout_intensity, notes: saved.workout_notes,
-          steps: saved.steps, water: saved.water_intake, sleep: saved.sleep_hours,
-          mood: saved.mood, energy: saved.energy_level,
-        }];
+    /* ── Resolve current today-log (may have been set after init) ── */
+    todayLog = findTodayLog();
+    let saved = null;
+
+    if (todayLog && todayLog.id) {
+      /* ── UPDATE path: PUT to existing row ── */
+      if (typeof apiUpdateLog === 'function') {
+        saved = await apiUpdateLog(todayLog.id, entry);
+        if (saved) {
+          /* Use findIndex to update the in-memory cache in-place */
+          const idx = GLOBAL_LOGS.findIndex(l => l.id === todayLog.id);
+          const normalised = {
+            id: saved.id, date: saved.log_date,
+            workout: saved.workout_type, duration: saved.workout_duration,
+            intensity: saved.workout_intensity, notes: saved.workout_notes,
+            steps: saved.steps, water: saved.water_intake, sleep: saved.sleep_hours,
+            mood: saved.mood, energy: saved.energy_level,
+          };
+          if (idx !== -1) {
+            GLOBAL_LOGS[idx] = normalised;
+          }
+          todayLog = normalised;  // keep reference fresh
+          showAlert('success', ['✏️ Today\'s log updated successfully!']);
+        } else {
+          showAlert('danger', ['❌ Update failed — please try again.']);
+          return;
+        }
+      }
+    } else {
+      /* ── SAVE path: POST new row ── */
+      if (typeof apiSaveLog === 'function') {
+        saved = await apiSaveLog(entry);
+        if (saved) {
+          const normalised = {
+            id: saved.id, date: saved.log_date,
+            workout: saved.workout_type, duration: saved.workout_duration,
+            intensity: saved.workout_intensity, notes: saved.workout_notes,
+            steps: saved.steps, water: saved.water_intake, sleep: saved.sleep_hours,
+            mood: saved.mood, energy: saved.energy_level,
+          };
+          GLOBAL_LOGS.push(normalised);
+          todayLog = normalised;
+          /* Switch UI to update mode for subsequent edits this session */
+          prefillDashboardForm(normalised);
+          showAlert('success', ['✅ Today\'s log saved successfully!']);
+        } else {
+          showAlert('danger', ['❌ Save failed — please try again.']);
+          return;
+        }
       }
     }
 
+    /* ── Dynamic re-render: stat cards + goal cards + step ring ── */
     refreshStatCards();
     if (typeof apiLoadDashboardGoals === 'function') apiLoadDashboardGoals();
-    showAlert('success', ["✅ Today's log saved successfully!"]);
-    form.reset();
   });
 }
 
 function refreshStatCards() {
   const logs = getLogs();
   if (logs.length === 0) return;
-  const last = logs[logs.length - 1];
+
+  /* Prefer today's log for the stat cards; fall back to the most recent */
+  const today = getTodayISO();
+  const todayEntry = logs.slice().reverse().find(l =>
+    String(l.date ?? l.log_date ?? '').slice(0, 10) === today
+  ) || logs[logs.length - 1];
+
+  const last = todayEntry;
 
   if (last.steps !== null && last.steps !== undefined) {
     const el = document.getElementById('statSteps');
     if (el) el.textContent = Number(last.steps).toLocaleString();
     const fill = document.getElementById('statStepsFill');
     if (fill) fill.style.width = pct(last.steps, getGoals().steps) + '%';
+
+    /* Re-render the step ring instantly without waiting for api.js */
+    if (typeof renderStepRing === 'function') {
+      const goalSteps = getGoals().steps;
+      renderStepRing(last.steps, goalSteps);
+      const doneEl  = document.getElementById('stepRingDone');
+      const leftEl  = document.getElementById('stepRingLeft');
+      const goalBdg = document.getElementById('stepRingGoalBadge');
+      const goalTxt = document.getElementById('stepRingGoalText');
+      if (doneEl)  doneEl.textContent  = Number(last.steps).toLocaleString();
+      if (leftEl)  leftEl.textContent  = Math.max(0, goalSteps - last.steps).toLocaleString();
+      if (goalBdg) goalBdg.textContent = 'Goal: ' + Number(goalSteps).toLocaleString() + ' steps';
+      if (goalTxt) goalTxt.textContent = 'of ' + Number(goalSteps).toLocaleString() + ' steps';
+    }
   }
 
   if (last.water !== null && last.water !== undefined) {

@@ -190,6 +190,33 @@ async function apiSaveLog(entry) {
   }
 }
 
+/**
+ * Update an existing log row via PUT /api/logs/:id.
+ * Called by initDashboard() smart-form when today's log already exists.
+ */
+async function apiUpdateLog(logId, entry) {
+  const payload = {
+    workout_type:      entry.workout    || null,
+    workout_duration:  entry.duration   || null,
+    workout_intensity: entry.intensity  || null,
+    workout_notes:     entry.notes      || null,
+    steps:             entry.steps      ?? null,
+    water_intake:      entry.water      ?? null,
+    sleep_hours:       entry.sleep      ?? null,
+    mood:              entry.mood       || null,
+    energy_level:      entry.energy     || null,
+  };
+
+  try {
+    const updated = await apiFetch(`/logs/${logId}`, 'PUT', payload);
+    console.info('[FitTrack] Log updated, id =', updated.id);
+    return updated;
+  } catch (err) {
+    console.warn('[FitTrack] Log update failed:', err.message);
+    return null;
+  }
+}
+
 /** Fetch logs from SQLite and normalise column names for app.js */
 async function apiFetchLogs(filters = {}) {
   const params = new URLSearchParams();
@@ -412,9 +439,32 @@ document.addEventListener('DOMContentLoaded', async () => {
     const logs = await apiFetchLogs({ limit: 100 });
     if (logs.length > 0) {
       GLOBAL_LOGS = logs;
+      /* Notify initDashboard's smart-form listener that logs are ready */
+      document.dispatchEvent(new CustomEvent('ft:logsLoaded'));
       if (typeof refreshStatCards === 'function') refreshStatCards();
     }
     await apiLoadDashboardGoals();
+
+    /* ── Step Ring Chart ── */
+    if (typeof renderStepRing === 'function') {
+      const prof    = window.FT.profile || {};
+      const stats2  = await apiFetch('/stats').catch(() => ({}));
+      const todayD  = (stats2 && stats2.today) || {};
+      const steps   = todayD.steps != null ? todayD.steps : null;
+      const goal    = prof.goal_steps || 10000;
+      renderStepRing(steps, goal);
+      /* Update flanking stat labels */
+      var doneEl = document.getElementById('stepRingDone');
+      var leftEl = document.getElementById('stepRingLeft');
+      var goalBadge = document.getElementById('stepRingGoalBadge');
+      var goalText  = document.getElementById('stepRingGoalText');
+      if (steps != null) {
+        if (doneEl)  doneEl.textContent  = Number(steps).toLocaleString();
+        if (leftEl)  leftEl.textContent  = Math.max(0, goal - steps).toLocaleString();
+      }
+      if (goalBadge) goalBadge.textContent = 'Goal: ' + Number(goal).toLocaleString() + ' steps';
+      if (goalText)  goalText.textContent  = 'of ' + Number(goal).toLocaleString() + ' steps';
+    }
   }
 
   /* ─── HISTORY ─── */
@@ -431,6 +481,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const logs = await apiFetchLogs();
     GLOBAL_LOGS = logs;
     if (typeof renderHistoryTable === 'function') renderHistoryTable();
+
+    /* ── Trend Line Chart ── */
+    /* Try data.json first (richer: has mood text, workout details).
+       Falls back to GLOBAL_LOGS automatically inside charts.js. */
+    if (typeof renderTrendFromAPI === 'function') {
+      renderTrendFromAPI('steps');
+    } else if (typeof renderTrendChart === 'function') {
+      renderTrendChart(GLOBAL_LOGS, 'steps');
+    }
   }
 
   /* ─── AWARDS ─── */

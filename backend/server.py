@@ -89,6 +89,30 @@ def api_insert_log():
     new_row = db.insert_log(data)
     return jsonify(new_row), 201
 
+@app.route("/api/logs/<int:log_id>", methods=["PUT"])
+def api_update_log(log_id):
+    data = request.get_json(silent=True) or {}
+
+    errors = []
+    if "steps" in data and data["steps"] is not None:
+        if float(data["steps"]) < 0:
+            errors.append("steps cannot be negative")
+    if "water_intake" in data and data["water_intake"] is not None:
+        if float(data["water_intake"]) < 0:
+            errors.append("water_intake cannot be negative")
+    if "sleep_hours" in data and data["sleep_hours"] is not None:
+        if float(data["sleep_hours"]) < 0:
+            errors.append("sleep_hours cannot be negative")
+
+    if errors:
+        return jsonify({"error": "Validation failed", "details": errors}), 400
+
+    updated = db.update_log(log_id, data)
+    if updated:
+        return jsonify(updated), 200
+    return jsonify({"error": "Log not found"}), 404
+
+
 @app.route("/api/logs/<int:log_id>", methods=["DELETE"])
 def api_delete_log(log_id):
     deleted = db.delete_log(log_id)

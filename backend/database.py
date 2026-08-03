@@ -174,6 +174,33 @@ def delete_log(log_id: int) -> bool:
         return cursor.rowcount > 0
 
 
+def update_log(log_id: int, data: dict) -> dict:
+    """Update an existing log row with the supplied fields. Returns the updated row, or {}."""
+    allowed = {
+        "log_date", "workout_type", "workout_duration", "workout_intensity",
+        "workout_notes", "steps", "water_intake", "sleep_hours",
+        "mood", "energy_level", "medications_taken",
+    }
+    fields = {k: v for k, v in data.items() if k in allowed}
+
+    if not fields:
+        return get_log_by_id(log_id)
+
+    set_clause = ", ".join(f"{k} = ?" for k in fields)
+    values     = list(fields.values()) + [log_id]
+
+    with get_connection() as conn:
+        cursor = conn.execute(
+            f"UPDATE logs SET {set_clause} WHERE id = ? AND user_id = 1",
+            values,
+        )
+        conn.commit()
+        if cursor.rowcount == 0:
+            return {}
+
+    return get_log_by_id(log_id)
+
+
 def get_stats() -> dict:
     with get_connection() as conn:
         row = conn.execute("""
