@@ -55,22 +55,34 @@ var MOOD_LABELS = {
 ═══════════════════════════════════════════════════════════ */
 
 /**
- * Renders (or updates) the step-progress doughnut ring on index.html.
- * Called by api.js after the dashboard stats are loaded from SQLite.
+ * Renders (or updates) the OVERALL DAILY GOAL doughnut ring on index.html.
+ * Combines Steps, Water, and Sleep goals — each counts as 1/3 of the ring.
  *
- * @param {number|null} steps     - Today's step count (null = no data yet)
- * @param {number}      goalSteps - Daily step goal (default 10 000)
+ * @param {object} log      - Today's log entry (steps, water, sleep fields)
+ * @param {object} goals    - Goal thresholds { steps, water, sleep }
  */
-function renderStepRing(steps, goalSteps) {
-  goalSteps = goalSteps || 10000;
-  var canvas = document.getElementById('stepRingChart');
+function renderGoalRing(log, goals) {
+  var canvas = document.getElementById('goalRingChart');
   if (!canvas || !window.Chart) return;
 
-  var safeSteps = (steps != null && isFinite(Number(steps)))
-    ? Math.max(0, Number(steps)) : 0;
-  var remaining = Math.max(0, goalSteps - safeSteps);
-  var pct       = Math.min(100, Math.round((safeSteps / goalSteps) * 100));
+  goals = goals || { steps: 10000, water: 3, sleep: 8 };
 
+  /* ── Determine which goals are met ── */
+  var stepsVal  = (log && log.steps  != null) ? Number(log.steps)  : null;
+  var waterVal  = (log && (log.water != null ? log.water : log.water_intake)) != null
+    ? Number(log.water != null ? log.water : log.water_intake) : null;
+  var sleepVal  = (log && (log.sleep != null ? log.sleep : log.sleep_hours))  != null
+    ? Number(log.sleep != null ? log.sleep : log.sleep_hours)  : null;
+
+  var stepsMet  = stepsVal !== null && stepsVal  >= goals.steps;
+  var waterMet  = waterVal !== null && waterVal  >= goals.water;
+  var sleepMet  = sleepVal !== null && sleepVal  >= goals.sleep;
+
+  var metCount  = [stepsMet, waterMet, sleepMet].filter(Boolean).length;
+  var totalGoals = 3;
+  var pct = Math.round((metCount / totalGoals) * 100);
+
+  /* ── CSS variable colours ── */
   var primary  = _cssVar('--primary')  || '#0d9488';
   var accent   = _cssVar('--accent')   || '#14b8a6';
   var border   = _cssVar('--border')   || '#e2e8f0';
@@ -78,14 +90,21 @@ function renderStepRing(steps, goalSteps) {
   var textCol  = _cssVar('--text')     || '#1e293b';
   var mutedCol = _cssVar('--muted')    || '#94a3b8';
 
-  if (window._FT_charts.stepRing) {
-    window._FT_charts.stepRing.destroy();
-    window._FT_charts.stepRing = null;
+  /* Segment colours: met = gradient teal, not-met = border grey */
+  var segColors = [
+    stepsMet ? primary  : border,
+    waterMet ? accent   : border,
+    sleepMet ? '#6366f1' : border,
+  ];
+
+  if (window._FT_charts.goalRing) {
+    window._FT_charts.goalRing.destroy();
+    window._FT_charts.goalRing = null;
   }
 
-  /* Inline center-text plugin — no extra CDN needed */
+  /* ── Center-text plugin ── */
   var centerTextPlugin = {
-    id: 'centerText',
+    id: 'goalCenterText',
     afterDraw: function (chart) {
       var ctx = chart.ctx;
       var ca  = chart.chartArea;
@@ -94,22 +113,22 @@ function renderStepRing(steps, goalSteps) {
       var cy = (ca.top  + ca.bottom) / 2;
       ctx.save();
 
-      /* Step count */
-      ctx.font = "800 1.65rem 'Inter', sans-serif";
-      ctx.fillStyle     = textCol;
-      ctx.textAlign     = 'center';
-      ctx.textBaseline  = 'middle';
-      ctx.fillText(safeSteps.toLocaleString(), cx, cy - 10);
+      /* Percentage */
+      ctx.font        = "800 1.65rem 'Inter', sans-serif";
+      ctx.fillStyle   = textCol;
+      ctx.textAlign   = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(pct + '%', cx, cy - 10);
 
       /* Sub-label */
       ctx.font      = "500 0.72rem 'Inter', sans-serif";
       ctx.fillStyle = mutedCol;
-      ctx.fillText('steps today', cx, cy + 14);
+      ctx.fillText('goals met', cx, cy + 14);
 
-      /* Percentage */
+      /* Met count */
       ctx.font      = "700 0.85rem 'Inter', sans-serif";
       ctx.fillStyle = pct >= 100 ? '#10b981' : primary;
-      ctx.fillText(pct + '%', cx, cy + 30);
+      ctx.fillText(metCount + ' / ' + totalGoals, cx, cy + 30);
 
       ctx.restore();
     },
@@ -117,17 +136,21 @@ function renderStepRing(steps, goalSteps) {
 
   _applyGlobalDefaults();
 
-  window._FT_charts.stepRing = new Chart(canvas, {
+  window._FT_charts.goalRing = new Chart(canvas, {
     type: 'doughnut',
     plugins: [centerTextPlugin],
     data: {
-      labels: ['Steps Done', 'Remaining'],
+      labels: [
+        '\ud83e\uddb6 Steps ('  + (stepsVal !== null ? Number(stepsVal).toLocaleString() : '—') + '/' + Number(goals.steps).toLocaleString() + ')',
+        '\ud83d\udca7 Water ('  + (waterVal !== null ? waterVal : '—') + '/' + goals.water + ' L)',
+        '\ud83c\udf19 Sleep ('  + (sleepVal !== null ? sleepVal : '—') + '/' + goals.sleep + ' hrs)',
+      ],
       datasets: [{
-        data: [safeSteps, remaining],
-        backgroundColor: [primary, border],
-        borderColor:     [primary, 'transparent'],
-        borderWidth:     [2, 0],
-        hoverBackgroundColor: [accent, border],
+        data: [1, 1, 1],   // equal thirds — colour encodes met/not-met
+        backgroundColor: segColors,
+        borderColor:     [cardBg, cardBg, cardBg],
+        borderWidth:     3,
+        hoverBackgroundColor: segColors.map(function(c) { return c === border ? border : c + 'cc'; }),
         hoverOffset: 6,
       }],
     },
@@ -144,23 +167,38 @@ function renderStepRing(steps, goalSteps) {
           bodyColor:   mutedCol,
           borderColor: border,
           borderWidth: 1,
-          padding: 10,
+          padding: 12,
           cornerRadius: 8,
           callbacks: {
             label: function (ctx) {
-              var val = ctx.raw;
-              return ctx.label === 'Steps Done'
-                ? ' ' + Number(val).toLocaleString() + ' steps completed'
-                : ' ' + Number(val).toLocaleString() + ' steps to goal';
+              var names  = ['Steps', 'Water', 'Sleep'];
+              var mets   = [stepsMet, waterMet, sleepMet];
+              var name   = names[ctx.dataIndex];
+              var status = mets[ctx.dataIndex] ? '\u2705 Met' : '\u274c Not met';
+              return ' ' + name + ': ' + status;
             },
           },
         },
-        /* zoom plugin not used on ring — explicitly disabled */
         zoom: undefined,
       },
     },
   });
+
+  /* ── Update companion stat elements ── */
+  var metEl  = document.getElementById('goalRingMet');
+  var leftEl = document.getElementById('goalRingLeft');
+  var pctEl  = document.getElementById('goalRingPct');
+  if (metEl)  metEl.textContent  = metCount + ' goal' + (metCount !== 1 ? 's' : '');
+  if (leftEl) leftEl.textContent = (totalGoals - metCount) + ' goal' + ((totalGoals - metCount) !== 1 ? 's' : '');
+  if (pctEl)  pctEl.textContent  = pct + '%';
 }
+
+/* Keep the old name as an alias so any external code calling renderStepRing still works */
+function renderStepRing(steps, goalSteps) {
+  // No-op shim: dashboard now uses renderGoalRing via refreshStatCards.
+  // This stub prevents "renderStepRing is not a function" errors from api.js.
+}
+
 
 
 /* ═══════════════════════════════════════════════════════════
@@ -320,20 +358,18 @@ function _drawTrendLine(logs, metric) {
   var textCol  = _cssVar('--text')    || '#1e293b';
   var mutedCol = _cssVar('--muted')   || '#94a3b8';
 
-  /* ── Filter to last 30 days with a valid value for this metric ── */
+  /* ── Plot ALL dates that have a valid value for this metric ── */
   var today  = new Date();
-  var cutoff = new Date(today);
-  cutoff.setDate(cutoff.getDate() - 29);
+  /* cutoff retained for future use / zoom limits but NOT applied to filter */
 
   var filtered = logs
     .filter(function (l) {
       var d = l.log_date;
       if (!d) return false;
-      var date = new Date(String(d).slice(0, 10));
       var rawVal = l[cfg.field];
       /* For mood, try numeric coercion */
       if (metric === 'mood') rawVal = (TREND_CONFIGS.mood.toNum(rawVal) != null) ? rawVal : null;
-      return date >= cutoff && rawVal != null;
+      return rawVal != null;
     })
     .sort(function (a, b) {
       return String(a.log_date) < String(b.log_date) ? -1 : 1;
@@ -375,7 +411,7 @@ function _drawTrendLine(logs, metric) {
     zoomCfg = {
       zoom: {
         zoom: {
-          wheel:  { enabled: true, speed: 0.08 },
+          wheel:  { enabled: true, speed: 0.02 },
           pinch:  { enabled: true },
           mode:   'x',
         },
@@ -398,7 +434,14 @@ function _drawTrendLine(logs, metric) {
       return items.length ? items[0].label : '';
     },
     label: function (item) {
-      return ' ' + cfg.label + ': ' + cfg.format(item.raw);
+      var idx = item.dataIndex;
+      var log = filtered[idx];
+      var primary = ' ' + cfg.label + ': ' + cfg.format(item.raw);
+      /* Append mood inline when viewing a non-mood metric */
+      if (metric !== 'mood' && log && log.mood != null) {
+        primary += '  \u00b7  Mood: ' + (MOOD_LABELS[String(log.mood)] || log.mood);
+      }
+      return primary;
     },
     afterBody: function (items) {
       if (!items.length) return [];
@@ -504,7 +547,7 @@ function _drawTrendLine(logs, metric) {
 
   /* Update the metric sub-label above the chart */
   var metricLabel = document.getElementById('trendMetricLabel');
-  if (metricLabel) metricLabel.textContent = cfg.label + ' — Last 30 Days';
+  if (metricLabel) metricLabel.textContent = cfg.label + ' — All Time';
 
   /* Show / hide zoom-reset button */
   var resetBtn = document.getElementById('trendZoomReset');
@@ -534,7 +577,7 @@ function resetTrendZoom() {
   var observer = new MutationObserver(function () {
     setTimeout(function () {
       _applyGlobalDefaults();
-      if (window._FT_charts.stepRing)  window._FT_charts.stepRing.update();
+      if (window._FT_charts.goalRing)  window._FT_charts.goalRing.update();
       if (window._FT_charts.trendLine) window._FT_charts.trendLine.update();
     }, 80);
   });

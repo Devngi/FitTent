@@ -322,20 +322,11 @@ function refreshStatCards() {
     if (el) el.textContent = Number(last.steps).toLocaleString();
     const fill = document.getElementById('statStepsFill');
     if (fill) fill.style.width = pct(last.steps, getGoals().steps) + '%';
+  }
 
-    /* Re-render the step ring instantly without waiting for api.js */
-    if (typeof renderStepRing === 'function') {
-      const goalSteps = getGoals().steps;
-      renderStepRing(last.steps, goalSteps);
-      const doneEl  = document.getElementById('stepRingDone');
-      const leftEl  = document.getElementById('stepRingLeft');
-      const goalBdg = document.getElementById('stepRingGoalBadge');
-      const goalTxt = document.getElementById('stepRingGoalText');
-      if (doneEl)  doneEl.textContent  = Number(last.steps).toLocaleString();
-      if (leftEl)  leftEl.textContent  = Math.max(0, goalSteps - last.steps).toLocaleString();
-      if (goalBdg) goalBdg.textContent = 'Goal: ' + Number(goalSteps).toLocaleString() + ' steps';
-      if (goalTxt) goalTxt.textContent = 'of ' + Number(goalSteps).toLocaleString() + ' steps';
-    }
+  /* ── Render Overall Goal Ring (Steps + Water + Sleep) ── */
+  if (typeof renderGoalRing === 'function') {
+    renderGoalRing(last, getGoals());
   }
 
   if (last.water !== null && last.water !== undefined) {

@@ -255,42 +255,36 @@
         <div class="goal-progress"><div class="goal-progress-fill" id="statWorkoutFill" style="width:0%"></div></div>
       </div>
     </div>
-    <!-- Overall Score -->
-    <div class="col">
-      <div class="goal-card score-card">
-        <div class="goal-icon">🎯</div>
-        <div class="goal-value" id="statScore">0%</div>
-        <div class="goal-label">Goal Score</div>
-        <div class="goal-sub"  id="statScoreGoal">0/3 goals met</div>
-        <div class="goal-progress"><div class="goal-progress-fill" id="statScoreFill" style="width:0%"></div></div>
-      </div>
-    </div>
   </div>
 
-  <!-- ── Step Ring Chart ── -->
+  <!-- ── Overall Daily Goal Ring ── -->
   <div class="step-ring-card mb-4">
     <div class="step-ring-card-header">
-      <span class="step-ring-card-title">&#128374; Steps Progress Ring</span>
-      <span style="font-size:0.72rem;color:var(--muted);" id="stepRingGoalBadge">Goal: 10,000 steps</span>
+      <span class="step-ring-card-title">🎯 Today's Overall Goals</span>
+      <span style="font-size:0.72rem;color:var(--muted);" id="goalRingBadge">Steps · Water · Sleep</span>
     </div>
     <div class="row align-items-center g-0">
       <div class="col-md-4 col-5">
         <div class="step-ring-wrap">
-          <canvas id="stepRingChart" aria-label="Daily step progress ring" role="img"></canvas>
+          <canvas id="goalRingChart" aria-label="Overall daily goal progress ring" role="img"></canvas>
         </div>
-        <p class="step-ring-goal" id="stepRingGoalText">of 10,000 steps</p>
+        <p class="step-ring-goal" id="goalRingSubText">goals combined</p>
       </div>
       <div class="col-md-8 col-7 ps-4">
-        <p style="font-size:0.82rem;color:var(--text);font-weight:600;margin-bottom:0.3rem;">Today's Step Goal</p>
-        <p style="font-size:0.78rem;color:var(--muted);line-height:1.55;margin-bottom:0.85rem;">Track your daily movement. The ring fills as you get closer to your goal. Hover for exact counts.</p>
-        <div style="display:flex;gap:1.2rem;">
+        <p style="font-size:0.82rem;color:var(--text);font-weight:600;margin-bottom:0.3rem;">Today's Overall Goals</p>
+        <p style="font-size:0.78rem;color:var(--muted);line-height:1.55;margin-bottom:0.85rem;">The ring reflects how many of your three daily goals (Steps, Water, Sleep) you have hit today. Hover for a breakdown.</p>
+        <div style="display:flex;gap:1.4rem;flex-wrap:wrap;">
           <div>
-            <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);">Done</div>
-            <div style="font-size:1.1rem;font-weight:800;color:var(--primary);" id="stepRingDone">—</div>
+            <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);">Met</div>
+            <div style="font-size:1.1rem;font-weight:800;color:var(--primary);" id="goalRingMet">—</div>
           </div>
           <div>
             <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);">Remaining</div>
-            <div style="font-size:1.1rem;font-weight:800;color:var(--text);" id="stepRingLeft">—</div>
+            <div style="font-size:1.1rem;font-weight:800;color:var(--text);" id="goalRingLeft">—</div>
+          </div>
+          <div>
+            <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);">Score</div>
+            <div style="font-size:1.1rem;font-weight:800;color:var(--primary);" id="goalRingPct">—</div>
           </div>
         </div>
       </div>
