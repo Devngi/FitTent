@@ -313,7 +313,7 @@ function refreshStatCards() {
   const today = getTodayISO();
   const todayEntry = logs.slice().reverse().find(l =>
     String(l.date ?? l.log_date ?? '').slice(0, 10) === today
-  ) || logs[logs.length - 1];
+  ) || { log_date: today, steps: 0, water: 0, sleep: 0, workout: null };
 
   const last = todayEntry;
 
