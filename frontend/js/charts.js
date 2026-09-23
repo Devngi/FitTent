@@ -1,6 +1,6 @@
 /**
  * ============================================================
- *  FitTrack — charts.js  (v2 — zoom + rich tooltips)
+ *  FitTent — charts.js  (v2 — zoom + rich tooltips)
  *  Requires (loaded via CDN in <head>):
  *    1. Chart.js  v4
  *    2. Hammer.js v2
@@ -277,7 +277,7 @@ function _fetchDataJson() {
       return logs;
     })
     .catch(function (err) {
-      console.warn('[FitTrack charts] data.json not found — falling back to GLOBAL_LOGS.', err.message);
+      console.warn('[FitTent charts] data.json not found — falling back to GLOBAL_LOGS.', err.message);
       return [];
     });
 }
@@ -535,7 +535,21 @@ function _drawTrendLine(logs, metric) {
           grid:  { color: border + '80' },
           ticks: { color: mutedCol, font: { size: 11 }, maxRotation: 30, maxTicksLimit: 10, autoSkip: true },
         },
-        y: {
+        y: metric === 'mood' ? {
+          title: { display: true, text: 'Mood (1–5)', color: mutedCol, font: { size: 11, weight: '600' } },
+          grid:  { color: border + '80' },
+          min: 1,
+          max: 5,
+          ticks: {
+            color: mutedCol,
+            font: { size: 11 },
+            stepSize: 1,
+            callback: function(v) {
+              var lbl = { 1: '😢 1', 2: '😔 2', 3: '😐 3', 4: '😊 4', 5: '😁 5' };
+              return lbl[v] || v;
+            },
+          },
+        } : {
           title: { display: true, text: cfg.yLabel, color: mutedCol, font: { size: 11, weight: '600' } },
           grid:  { color: border + '80' },
           ticks: { color: mutedCol, font: { size: 11 } },

@@ -1,7 +1,7 @@
 """
 export_data.py
 ==============
-Standalone Python export script for FitTrack.
+Standalone Python export script for FitTent.
 Uses ONLY built-in libraries: sqlite3 and json.
 
 Usage:
@@ -9,7 +9,7 @@ Usage:
         → writes  frontend/data.json
 
 What it exports:
-    Last 30 days of health logs from fittrack.db including:
+    Last 30 days of health logs from fittent.db including:
     log_date, steps, water_intake, sleep_hours,
     workout_type, workout_duration, mood, energy_level, workout_intensity
 """
@@ -21,7 +21,7 @@ from datetime import datetime, timedelta, timezone
 
 # ── Paths ──────────────────────────────────────────────────────
 SCRIPT_DIR   = os.path.dirname(os.path.abspath(__file__))
-DB_PATH      = os.path.join(SCRIPT_DIR, "fittrack.db")
+DB_PATH      = os.path.join(SCRIPT_DIR, "fittent.db")
 OUTPUT_PATH  = os.path.join(SCRIPT_DIR, "..", "frontend", "data.json")
 OUTPUT_PATH  = os.path.normpath(OUTPUT_PATH)
 
@@ -34,13 +34,13 @@ date_to   = today.isoformat()                 # e.g. "2026-08-03"
 
 def export_logs(db_path: str) -> list:
     """
-    Query fittrack.db for the last 30 days of logs.
+    Query fittent.db for the last 30 days of logs.
     Returns a list of dicts with safe JSON-serialisable values.
     """
     if not os.path.exists(db_path):
         raise FileNotFoundError(
             f"Database not found at: {db_path}\n"
-            "Make sure you have started the FitTrack server at least once."
+            "Make sure you have started the FitTent server at least once."
         )
 
     conn = sqlite3.connect(db_path)
@@ -87,8 +87,8 @@ def export_logs(db_path: str) -> list:
 
 
 def main():
-    print(f"[FitTrack Exporter] Reading: {DB_PATH}")
-    print(f"[FitTrack Exporter] Date range: {date_from} → {date_to}")
+    print(f"[FitTent Exporter] Reading: {DB_PATH}")
+    print(f"[FitTent Exporter] Date range: {date_from} → {date_to}")
 
     logs = export_logs(DB_PATH)
 
@@ -103,7 +103,7 @@ def main():
     with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2, ensure_ascii=False)
 
-    print(f"[FitTrack Exporter] ✅ Exported {len(logs)} entries → {OUTPUT_PATH}")
+    print(f"[FitTent Exporter] ✅ Exported {len(logs)} entries → {OUTPUT_PATH}")
 
 
 if __name__ == "__main__":

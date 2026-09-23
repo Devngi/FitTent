@@ -1,6 +1,6 @@
 /**
  * ============================================================
- *  FitTrack — app.js
+ *  FitTent — app.js
  *  Vanilla JavaScript (NO localStorage — all data via SQLite API)
  *
  *  Pages handled:
@@ -964,7 +964,7 @@ function clearMedData() {
 }
 
 async function resetAllData() {
-  if (!confirm('⚠️ This will wipe ALL FitTrack data. Are you sure?')) return;
+  if (!confirm('⚠️ This will wipe ALL FitTent data. Are you sure?')) return;
   await clearActivityLogs();
   clearMedData();
   GLOBAL_LOGS = [];
@@ -986,7 +986,7 @@ function exportData() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'fittrack-export-' + new Date().toISOString().slice(0, 10) + '.json';
+  a.download = 'fittent-export-' + new Date().toISOString().slice(0, 10) + '.json';
   a.click();
   URL.revokeObjectURL(url);
   showSettingsAlert('success', '📥 Data exported successfully!');

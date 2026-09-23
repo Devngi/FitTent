@@ -3,94 +3,179 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FitTrack – Medication</title>
+  <title>FitTent – Prescription &amp; Alarm Manager</title>
+  <meta name="description" content="Manage your prescriptions, set medication alarms, and track daily supplements with FitTent." />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <!-- ✦ THEME BOOTSTRAP: zero flash ✦ -->
   <script>(function(){var t=sessionStorage.getItem('ft_theme')||'light';document.documentElement.setAttribute('data-theme',t);if(t==='dark')document.documentElement.classList.add('preload-dark');})();</script>
   <style>
-    /* ── Tokens (Unified Health-Tech Palette) ── */
     :root {
-      --primary:    #0d9488;
-      --accent:     #14b8a6;
-      --bg:         #f0fdfa;
-      --sidebar-bg: #0f172a;
-      --sidebar-w:  260px;
-      --text:       #1e293b;
-      --muted:      #94a3b8;
-      --border:     #e2e8f0;
-      --card-r:     0.85rem;
-      --card-bg:    #ffffff;
+      --primary:#0d9488;--accent:#14b8a6;--bg:#f0fdfa;--sidebar-bg:#0f172a;
+      --sidebar-w:260px;--text:#1e293b;--muted:#94a3b8;--border:#e2e8f0;
+      --card-r:0.85rem;--card-bg:#ffffff;
     }
-    body.dark-mode { --bg:#0f172a; --text:#e2e8f0; --muted:#94a3b8; --border:#1e293b; --card-bg:#1e293b; background:#0f172a; color:#e2e8f0; }
-    body.dark-mode .form-card { background:#1e293b; border-color:#334155; }
-    body.dark-mode .form-control, body.dark-mode .form-select { background:#0f172a; border-color:#334155; color:#e2e8f0; }
-    body.dark-mode .form-label { color:#e2e8f0; }
-    body.dark-mode .section-label { color:#22d3ee; border-color:#334155; }
-    body.dark-mode .topbar-title { color:#e2e8f0; }
-    body.dark-mode .med-item { background:#1e293b !important; border-color:#334155 !important; }
-    body.dark-mode .med-item label { color:#e2e8f0; }
-    body.dark-mode .info-banner { background:rgba(6,182,212,0.05); }
-    body.dark-mode .input-group-text { background:#0f172a; border-color:#334155; color:#22d3ee; }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; }
+    body.dark-mode{--bg:#0f172a;--text:#e2e8f0;--muted:#94a3b8;--border:#1e293b;--card-bg:#1e293b;background:#0f172a;color:#e2e8f0;}
+    body.dark-mode .form-card{background:#1e293b;border-color:#334155;}
+    body.dark-mode .form-control,body.dark-mode .form-select{background:#0f172a;border-color:#334155;color:#e2e8f0;}
+    body.dark-mode .form-label{color:#e2e8f0;}
+    body.dark-mode .section-label{color:#22d3ee;border-color:#334155;}
+    body.dark-mode .topbar-title{color:#e2e8f0;}
+    body.dark-mode .med-item{background:#1e293b!important;border-color:#334155!important;}
+    body.dark-mode .med-item label{color:#e2e8f0;}
+    body.dark-mode .info-banner{background:rgba(6,182,212,0.05);}
+    body.dark-mode .input-group-text{background:#0f172a;border-color:#334155;color:#22d3ee;}
+    body.dark-mode .rx-card{background:#1e293b;border-color:#334155;}
+    body.dark-mode .rx-name{color:#e2e8f0;}
+    body.dark-mode .rx-meta-label{color:#64748b;}
+    body.dark-mode .rx-meta-value{color:#94a3b8;}
+    body.dark-mode .rx-notes{background:rgba(255,255,255,0.04);color:#94a3b8;}
+    body.dark-mode .rx-dashboard-header{color:#e2e8f0;}
+    body.dark-mode .rx-empty{color:#64748b;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;}
 
     /* Sidebar */
-    .sidebar { width: var(--sidebar-w); min-height: 100vh; background: var(--sidebar-bg); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; box-shadow: 4px 0 24px rgba(0,0,0,0.18); }
-    .sidebar-brand { padding: 1.6rem 1.5rem 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.07); }
-    .brand-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-    .brand-icon { width: 38px; height: 38px; background: linear-gradient(135deg, var(--primary), var(--accent)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
-    .brand-name { font-size: 1.3rem; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
-    .brand-sub { font-size: 0.65rem; color: rgba(255,255,255,0.4); letter-spacing: 0.05em; text-transform: uppercase; display: block; }
-    .sidebar-nav { padding: 1rem 0; }
-    .nav-section-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 0.8rem 1.5rem 0.4rem; }
-    .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 0.65rem 1.5rem; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.9rem; font-weight: 500; border-left: 3px solid transparent; transition: all 0.18s; }
-    .sidebar-link:hover { color: #fff; background: rgba(255,255,255,0.05); }
-    .sidebar-link.active { color: #fff; background: rgba(13,148,136,0.18); border-left-color: var(--primary); }
-    .sidebar-link .nav-icon { font-size: 1.05rem; width: 20px; text-align: center; }
-    .quote-card { margin: 0.5rem 1rem 1rem; background: linear-gradient(135deg, rgba(13,148,136,0.25), rgba(6,182,212,0.15)); border: 1px solid rgba(13,148,136,0.35); border-radius: var(--card-r); padding: 1rem 1.1rem; }
-    .quote-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 0.5rem; }
-    .quote-text { font-size: 0.82rem; color: rgba(255,255,255,0.8); font-style: italic; line-height: 1.5; }
-    .quote-author { font-size: 0.72rem; color: rgba(255,255,255,0.45); margin-top: 0.4rem; }
+    .sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--sidebar-bg);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;box-shadow:4px 0 24px rgba(0,0,0,.18);}
+    .sidebar-brand{padding:1.6rem 1.5rem 1.2rem;border-bottom:1px solid rgba(255,255,255,.07);}
+    .brand-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+    .brand-icon-img{width:38px;height:38px;border-radius:10px;object-fit:cover;flex-shrink:0;}
+    .brand-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;}
+    .brand-name{font-size:1.3rem;font-weight:800;color:#fff;letter-spacing:-.5px;}
+    .brand-sub{font-size:.65rem;color:rgba(255,255,255,.4);letter-spacing:.05em;text-transform:uppercase;display:block;}
+    .sidebar-nav{padding:1rem 0;}
+    .nav-section-label{font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);padding:.8rem 1.5rem .4rem;}
+    .sidebar-link{display:flex;align-items:center;gap:12px;padding:.65rem 1.5rem;color:rgba(255,255,255,.6);text-decoration:none;font-size:.9rem;font-weight:500;border-left:3px solid transparent;transition:all .18s;}
+    .sidebar-link:hover{color:#fff;background:rgba(255,255,255,.05);}
+    .sidebar-link.active{color:#fff;background:rgba(13,148,136,.18);border-left-color:var(--primary);}
+    .sidebar-link .nav-icon{font-size:1.05rem;width:20px;text-align:center;}
+    .quote-card{margin:.5rem 1rem 1rem;background:linear-gradient(135deg,rgba(13,148,136,.25),rgba(6,182,212,.15));border:1px solid rgba(13,148,136,.35);border-radius:var(--card-r);padding:1rem 1.1rem;}
+    .quote-label{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:.5rem;}
+    .quote-text{font-size:.82rem;color:rgba(255,255,255,.8);font-style:italic;line-height:1.5;}
+    .quote-author{font-size:.72rem;color:rgba(255,255,255,.45);margin-top:.4rem;}
 
     /* Main */
-    .main-content { margin-left: var(--sidebar-w); flex: 1; padding: 2rem 2.5rem; min-height: 100vh; }
-    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
-    .topbar-title { font-size: 1.6rem; font-weight: 800; color: var(--text); }
-    .topbar-date { font-size: 0.85rem; color: var(--muted); margin-top: 2px; }
+    .main-content{margin-left:var(--sidebar-w);flex:1;padding:2rem 2.5rem;min-height:100vh;}
+    .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;}
+    .topbar-title{font-size:1.6rem;font-weight:800;color:var(--text);}
+    .topbar-date{font-size:.85rem;color:var(--muted);margin-top:2px;}
 
     /* Form card */
-    .form-card { background: #fff; border: 1px solid var(--border); border-radius: var(--card-r); box-shadow: 0 4px 20px rgba(13,148,136,0.08); overflow: hidden; }
-    .form-card-header { background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%); padding: 1.3rem 1.75rem; color: #fff; }
-    .form-card-header h5 { font-size: 1.05rem; font-weight: 700; margin: 0 0 2px; }
-    .form-card-header small { font-size: 0.8rem; opacity: 0.82; }
-    .form-card-body { padding: 1.6rem 1.75rem; }
-    .section-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; margin-bottom: 1rem; }
-    .form-label { font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem; }
-    .form-control, .form-select { border-color: #d1fae5; background: #f9fffe; font-size: 0.88rem; color: var(--text); border-radius: 0.5rem; }
-    .form-control:focus, .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(13,148,136,0.15); background: #fff; }
-    .form-control::placeholder { color: #94a3b8; }
-    .form-text { font-size: 0.72rem; color: var(--muted); }
-    .btn-submit { background: linear-gradient(135deg, var(--primary), var(--accent)); border: none; color: #fff; font-weight: 700; font-size: 0.95rem; padding: 0.72rem 2.5rem; border-radius: 0.55rem; transition: opacity 0.2s, transform 0.15s; }
-    .btn-submit:hover { opacity: 0.9; transform: translateY(-1px); color: #fff; }
-    .btn-reset { border: 1.5px solid var(--border); background: transparent; color: var(--muted); font-weight: 600; font-size: 0.9rem; padding: 0.7rem 1.8rem; border-radius: 0.55rem; }
-    .btn-reset:hover { border-color: var(--primary); color: var(--primary); }
+    .form-card{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--card-r);box-shadow:0 4px 20px rgba(13,148,136,.08);overflow:hidden;margin-bottom:2rem;}
+    .form-card-header{background:linear-gradient(135deg,var(--primary) 0%,var(--accent) 100%);padding:1.3rem 1.75rem;color:#fff;}
+    .form-card-header h5{font-size:1.05rem;font-weight:700;margin:0 0 2px;}
+    .form-card-header small{font-size:.8rem;opacity:.82;}
+    .form-card-body{padding:1.6rem 1.75rem;}
+    .section-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--primary);border-bottom:1px solid var(--border);padding-bottom:.4rem;margin-bottom:1rem;}
+    .form-label{font-weight:600;font-size:.85rem;margin-bottom:.3rem;}
+    .form-control,.form-select{border-color:#d1fae5;background:#f9fffe;font-size:.88rem;color:var(--text);border-radius:.5rem;}
+    .form-control:focus,.form-select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(13,148,136,.15);background:#fff;}
+    .form-control::placeholder{color:#94a3b8;}
+    .form-text{font-size:.72rem;color:var(--muted);}
+    .btn-submit{background:linear-gradient(135deg,var(--primary),var(--accent));border:none;color:#fff;font-weight:700;font-size:.95rem;padding:.72rem 2.5rem;border-radius:.55rem;transition:opacity .2s,transform .15s;}
+    .btn-submit:hover{opacity:.9;transform:translateY(-1px);color:#fff;}
+    .btn-reset{border:1.5px solid var(--border);background:transparent;color:var(--muted);font-weight:600;font-size:.9rem;padding:.7rem 1.8rem;border-radius:.55rem;}
+    .btn-reset:hover{border-color:var(--primary);color:var(--primary);}
 
-    /* Medication grid */
-    .med-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); gap: 0.7rem; }
-    .med-item { display: flex; align-items: center; gap: 10px; padding: 0.7rem 0.9rem; border: 1.5px solid #d1fae5; border-radius: 0.6rem; background: #f9fffe; cursor: pointer; transition: border-color 0.15s, background 0.15s, box-shadow 0.15s; }
-    .med-item:has(input:checked) { background: rgba(13,148,136,0.07); border-color: var(--primary); box-shadow: 0 0 0 3px rgba(13,148,136,0.1); }
-    .med-item input { accent-color: var(--primary); width: 16px; height: 16px; flex-shrink: 0; }
-    .med-item label { font-size: 0.85rem; font-weight: 500; cursor: pointer; margin: 0; line-height: 1.3; }
-    .med-item .med-time { font-size: 0.68rem; color: var(--muted); display: block; }
+    /* Pill color/shape */
+    .pill-visual-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;}
+    .color-preview-wrap{position:relative;}
+    .rx-color-swatch-preview{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;cursor:pointer;border:3px solid rgba(255,255,255,.5);box-shadow:0 4px 14px rgba(0,0,0,.2);transition:transform .2s;}
+    .rx-color-swatch-preview:hover{transform:scale(1.1);}
+    input[type="color"]#rxPillColor{position:absolute;opacity:0;width:44px;height:44px;top:0;left:0;cursor:pointer;}
+    .shape-selector{display:flex;gap:.5rem;flex-wrap:wrap;}
+    .shape-opt{display:none;}
+    .shape-opt+label{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border:2px solid var(--border);border-radius:.5rem;font-size:1.1rem;cursor:pointer;background:var(--card-bg);transition:all .15s;user-select:none;}
+    .shape-opt:checked+label{border-color:var(--primary);background:rgba(13,148,136,.12);box-shadow:0 0 0 3px rgba(13,148,136,.2);}
+    .shape-opt+label:hover{border-color:var(--accent);}
+    .color-presets{display:flex;gap:.45rem;flex-wrap:wrap;align-items:center;}
+    .color-preset{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s;flex-shrink:0;}
+    .color-preset:hover,.color-preset.active{border-color:#fff;transform:scale(1.15);box-shadow:0 0 0 2px var(--primary);}
 
-    /* Dosage row */
-    .dosage-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+    /* Prescription dashboard */
+    .rx-dashboard-wrap{margin-bottom:2rem;}
+    .rx-dashboard-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;font-size:1.1rem;font-weight:800;color:var(--text);}
+    .rx-count-badge{display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;font-size:.72rem;font-weight:700;border-radius:99px;min-width:24px;height:24px;padding:0 8px;}
+    .rx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1.1rem;}
+    .rx-card{background:var(--card-bg);border:1.5px solid var(--border);border-radius:1rem;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.06);transition:transform .2s,box-shadow .2s;display:flex;flex-direction:column;}
+    .rx-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(13,148,136,.14);}
+    .rx-card-header{padding:1.1rem 1.1rem .9rem;display:flex;align-items:center;gap:.75rem;position:relative;}
+    .rx-swatch{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+    .rx-shape-symbol{line-height:1;}
+    .rx-type-badge{font-size:.72rem;font-weight:700;border-radius:99px;padding:.25rem .7rem;letter-spacing:.02em;}
+    .rx-delete-btn{position:absolute;top:.6rem;right:.7rem;background:none;border:none;font-size:.75rem;color:var(--muted);cursor:pointer;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s;}
+    .rx-delete-btn:hover{background:rgba(239,68,68,.12);color:#ef4444;}
+    .rx-card-body{padding:0 1.1rem 1.1rem;flex:1;display:flex;flex-direction:column;gap:.5rem;}
+    .rx-name{font-size:1rem;font-weight:700;color:var(--text);line-height:1.3;}
+    .rx-dosage{font-size:.82rem;color:var(--muted);font-weight:500;}
+    .rx-meta{display:flex;flex-direction:column;gap:.2rem;margin-top:.25rem;}
+    .rx-meta-row{display:flex;justify-content:space-between;align-items:center;}
+    .rx-meta-label{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
+    .rx-meta-value{font-size:.78rem;color:var(--text);font-weight:500;}
+    .rx-alarm-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(245,158,11,.12);color:#d97706;border:1px solid rgba(245,158,11,.3);border-radius:99px;padding:.25rem .65rem;font-size:.72rem;font-weight:700;margin-top:.3rem;width:fit-content;}
+    .rx-alarm-badge.fired{background:rgba(13,148,136,.12);color:var(--primary);border-color:rgba(13,148,136,.3);}
+    .rx-alarm-badge.fired::before{content:'✓ ';}
+    .rx-notes{font-size:.75rem;color:var(--muted);line-height:1.45;background:rgba(0,0,0,.03);border-radius:.4rem;padding:.4rem .6rem;margin-top:.25rem;}
+    .rx-empty{display:none;flex-direction:column;align-items:center;justify-content:center;gap:.6rem;padding:3rem 1rem;color:var(--muted);border:2px dashed var(--border);border-radius:1rem;background:rgba(13,148,136,.02);}
+    .rx-empty-icon{font-size:2.5rem;opacity:.5;}
+    .rx-empty-text{font-size:.88rem;font-weight:500;}
 
-    /* Info banner */
-    .info-banner { background: rgba(6,182,212,0.08); border: 1px solid rgba(6,182,212,0.3); border-radius: 0.6rem; padding: 0.85rem 1.1rem; display: flex; align-items: flex-start; gap: 10px; margin-bottom: 1.5rem; }
-    .info-banner .info-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
-    .info-banner p { font-size: 0.82rem; color: var(--muted); margin: 0; line-height: 1.5; }
+    /* Supplements grid (preserved) */
+    .med-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:.7rem;}
+    .med-item{display:flex;align-items:center;gap:10px;padding:.7rem .9rem;border:1.5px solid #d1fae5;border-radius:.6rem;background:#f9fffe;cursor:pointer;transition:border-color .15s,background .15s,box-shadow .15s;}
+    .med-item:has(input:checked){background:rgba(13,148,136,.07);border-color:var(--primary);box-shadow:0 0 0 3px rgba(13,148,136,.1);}
+    .med-item input{accent-color:var(--primary);width:16px;height:16px;flex-shrink:0;}
+    .med-item label{font-size:.85rem;font-weight:500;cursor:pointer;margin:0;line-height:1.3;}
+    .med-item .med-time{font-size:.68rem;color:var(--muted);display:block;}
+    .info-banner{background:rgba(6,182,212,.08);border:1px solid rgba(6,182,212,.3);border-radius:.6rem;padding:.85rem 1.1rem;display:flex;align-items:flex-start;gap:10px;margin-bottom:1.5rem;}
+    .info-banner .info-icon{font-size:1.1rem;flex-shrink:0;margin-top:1px;}
+    .info-banner p{font-size:.82rem;color:var(--muted);margin:0;line-height:1.5;}
+    /* Medication completion history */
+    .med-history-list { display: flex; flex-direction: column; gap: .65rem; }
+    .med-hist-row {
+      display: flex; align-items: center; gap: 1rem;
+      padding: .85rem 1.1rem;
+      border: 1.5px solid var(--border);
+      border-radius: .7rem;
+      background: var(--card-bg);
+      transition: all .18s;
+      cursor: pointer;
+      user-select: none;
+    }
+    .med-hist-row:hover { border-color: var(--primary); }
+    .med-hist-row.done  { background: rgba(13,148,136,.06); border-color: rgba(13,148,136,.35); }
+    .med-hist-row.done .mhr-name { text-decoration: line-through; color: var(--muted); }
+    .mhr-check {
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; font-size: .8rem;
+      transition: all .2s;
+    }
+    .med-hist-row.done .mhr-check { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .mhr-info { flex: 1; }
+    .mhr-name { font-size: .88rem; font-weight: 600; color: var(--text); }
+    .mhr-meta { font-size: .73rem; color: var(--muted); margin-top: 2px; }
+    .mhr-time  { font-size: .78rem; font-weight: 600; color: var(--primary); white-space: nowrap; }
+    .mhr-done-stamp { font-size: .72rem; color: var(--primary); font-weight: 600; }
+    .med-hist-empty { text-align: center; padding: 2.5rem 1rem; color: var(--muted); }
+    .med-hist-empty .empty-icon { font-size: 2.2rem; margin-bottom: .75rem; opacity: .4; }
+    /* history timeline */
+    .med-day-group { margin-bottom: 1.5rem; }
+    .med-day-label {
+      font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
+      color: var(--primary); border-bottom: 1px solid var(--border);
+      padding-bottom: .35rem; margin-bottom: .75rem;
+    }
+    .med-day-summary {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: .82rem; color: var(--muted);
+    }
+    .med-done-badge   { background: rgba(13,148,136,.12);  color: var(--primary); border-radius: 99px; padding: .15rem .6rem; font-size: .72rem; font-weight: 700; }
+    .med-missed-badge { background: rgba(239,68,68,.1);    color: #ef4444;         border-radius: 99px; padding: .15rem .6rem; font-size: .72rem; font-weight: 700; }
+    body.dark-mode .med-hist-row { background: #1e293b; border-color: #334155; }
+    body.dark-mode .med-hist-row.done { background: rgba(13,148,136,.1); border-color: rgba(13,148,136,.4); }
+    body.dark-mode .mhr-name { color: #e2e8f0; }
+    body.dark-mode .med-day-label { color: #22d3ee; }
   </style>
 </head>
 <body>
@@ -98,15 +183,15 @@
 <aside class="sidebar">
   <div class="sidebar-brand">
     <a href="index.html" class="brand-logo">
-      <div class="brand-icon">&#128170;</div>
-      <div><span class="brand-name">FitTrack</span><span class="brand-sub">Health Logger</span></div>
+      <img src="assets/logo.jpg" class="brand-icon-img" alt="FitTent logo" />
+      <div><span class="brand-name">FitTent</span><span class="brand-sub">Health Logger</span></div>
     </a>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section-label">Menu</div>
     <a href="index.html"      class="sidebar-link" data-page="index.html"><span class="nav-icon">&#128200;</span> Dashboard</a>
     <a href="history.html"    class="sidebar-link" data-page="history.html"><span class="nav-icon">&#128203;</span> History</a>
-    <a href="medication.html" class="sidebar-link" data-page="medication.html"><span class="nav-icon">&#128138;</span> Medication</a>
+    <a href="medication.html" class="sidebar-link active" data-page="medication.html"><span class="nav-icon">&#128138;</span> Medication</a>
     <a href="awards.html"     class="sidebar-link" data-page="awards.html"><span class="nav-icon">&#127942;</span> Awards</a>
     <a href="settings.html"   class="sidebar-link" data-page="settings.html"><span class="nav-icon">&#9881;&#65039;</span> Settings</a>
   </nav>
@@ -120,187 +205,418 @@
 <div class="main-content">
   <div class="topbar">
     <div>
-      <div class="topbar-title">&#128138; Medication Tracker</div>
-      <div class="topbar-date">Log your daily medications and supplements.</div>
+      <div class="topbar-title">&#128138; Prescription &amp; Alarm Manager</div>
+      <div class="topbar-date">Save prescriptions to SQLite and get timed alarms.</div>
     </div>
   </div>
 
+  <!-- ═══ SECTION 1: ADD NEW PRESCRIPTION ═══ -->
   <div class="form-card">
     <div class="form-card-header">
-      <h5>&#128197; Today's Medication Log</h5>
-      <small>Check off every supplement or medication you've taken today.</small>
+      <h5>&#43; Add New Prescription</h5>
+      <small>All fields are saved to your SQLite database and used by the alarm system.</small>
     </div>
-
-    <form class="form-card-body" id="medForm" onsubmit="event.preventDefault();" novalidate>
-
+    <form class="form-card-body" id="rxForm" novalidate>
       <div class="info-banner">
         <span class="info-icon">&#8505;&#65039;</span>
-        <p>This tracker is for logging purposes only. Always follow your doctor's or pharmacist's prescribed dosage and schedule.</p>
+        <p>This tracker is for logging purposes only. Always follow your doctor's prescribed dosage and schedule.</p>
       </div>
 
-      <!-- Common Supplements -->
-      <p class="section-label">&#127807; Common Supplements</p>
-      <div class="med-grid mb-4">
-        <div class="med-item">
-          <input type="checkbox" id="med_mv"  name="meds" value="multivitamin" />
-          <label for="med_mv"><span>&#127807;</span> Multivitamin<span class="med-time">Morning</span></label>
-        </div>
-        <div class="med-item">
-          <input type="checkbox" id="med_vd"  name="meds" value="vitamin_d" />
-          <label for="med_vd"><span>&#9728;&#65039;</span> Vitamin D3<span class="med-time">Morning</span></label>
-        </div>
-        <div class="med-item">
-          <input type="checkbox" id="med_vc"  name="meds" value="vitamin_c" />
-          <label for="med_vc"><span>&#127818;</span> Vitamin C<span class="med-time">Morning</span></label>
-        </div>
-        <div class="med-item">
-          <input type="checkbox" id="med_om"  name="meds" value="omega3" />
-          <label for="med_om"><span>&#128027;</span> Omega-3<span class="med-time">With meal</span></label>
-        </div>
-        <div class="med-item">
-          <input type="checkbox" id="med_mg"  name="meds" value="magnesium" />
-          <label for="med_mg"><span>&#127774;</span> Magnesium<span class="med-time">Evening</span></label>
-        </div>
-        <div class="med-item">
-          <input type="checkbox" id="med_zn"  name="meds" value="zinc" />
-          <label for="med_zn"><span>&#129504;</span> Zinc<span class="med-time">With meal</span></label>
-        </div>
-        <div class="med-item">
-          <input type="checkbox" id="med_b12" name="meds" value="b12" />
-          <label for="med_b12"><span>&#9889;</span> Vitamin B12<span class="med-time">Morning</span></label>
-        </div>
-        <div class="med-item">
-          <input type="checkbox" id="med_fe"  name="meds" value="iron" />
-          <label for="med_fe"><span>&#128997;</span> Iron<span class="med-time">Morning (empty stomach)</span></label>
-        </div>
-      </div>
-
-      <!-- Fitness Supplements -->
-      <p class="section-label">&#128170; Fitness Supplements</p>
-      <div class="med-grid mb-4">
-        <div class="med-item">
-          <input type="checkbox" id="med_pr"  name="meds" value="protein" />
-          <label for="med_pr"><span>&#128170;</span> Protein Shake<span class="med-time">Post-workout</span></label>
-        </div>
-        <div class="med-item">
-          <input type="checkbox" id="med_cr"  name="meds" value="creatine" />
-          <label for="med_cr"><span>&#9889;</span> Creatine<span class="med-time">Daily</span></label>
-        </div>
-        <div class="med-item">
-          <input type="checkbox" id="med_bcaa" name="meds" value="bcaa" />
-          <label for="med_bcaa"><span>&#128006;</span> BCAAs<span class="med-time">During workout</span></label>
-        </div>
-        <div class="med-item">
-          <input type="checkbox" id="med_pre"  name="meds" value="preworkout" />
-          <label for="med_pre"><span>&#128293;</span> Pre-Workout<span class="med-time">Before workout</span></label>
-        </div>
-        <div class="med-item">
-          <input type="checkbox" id="med_pb"   name="meds" value="probiotic" />
-          <label for="med_pb"><span>&#129440;</span> Probiotic<span class="med-time">Morning</span></label>
-        </div>
-        <div class="med-item">
-          <input type="checkbox" id="med_mel"  name="meds" value="melatonin" />
-          <label for="med_mel"><span>&#127769;</span> Melatonin<span class="med-time">Before sleep</span></label>
-        </div>
-      </div>
-
-      <!-- Prescribed / Custom -->
-      <p class="section-label">&#128210; Prescribed &amp; Custom Medications</p>
-      <div class="row g-3 mb-4">
-        <div class="col-md-6">
-          <label for="rx1_name" class="form-label">Medication Name</label>
-          <input type="text" class="form-control" id="rx1_name" placeholder="e.g. Metformin" />
+      <p class="section-label">&#128138; Medication Details</p>
+      <div class="row g-3 mb-3">
+        <div class="col-md-5">
+          <label for="rxMedName" class="form-label">Medication Name <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="rxMedName" placeholder="e.g. Metformin, Vitamin D3" required />
         </div>
         <div class="col-md-3">
-          <label for="rx1_dose" class="form-label">Dosage</label>
-          <input type="text" class="form-control" id="rx1_dose" placeholder="e.g. 500 mg" />
-        </div>
-        <div class="col-md-3">
-          <label for="rx1_time" class="form-label">Time Taken</label>
-          <input type="time" class="form-control" id="rx1_time" />
-        </div>
-        <div class="col-md-6">
-          <label for="rx2_name" class="form-label">Medication Name</label>
-          <input type="text" class="form-control" id="rx2_name" placeholder="e.g. Atorvastatin" />
-        </div>
-        <div class="col-md-3">
-          <label for="rx2_dose" class="form-label">Dosage</label>
-          <input type="text" class="form-control" id="rx2_dose" placeholder="e.g. 10 mg" />
-        </div>
-        <div class="col-md-3">
-          <label for="rx2_time" class="form-label">Time Taken</label>
-          <input type="time" class="form-control" id="rx2_time" />
-        </div>
-        <div class="col-12">
-          <label for="medNotes" class="form-label">Additional Notes</label>
-          <textarea class="form-control" id="medNotes" rows="2" placeholder="Any reactions, missed doses, or extra notes…"></textarea>
-        </div>
-      </div>
-
-      <!-- Reminder alarm section -->
-      <p class="section-label">&#9200; Daily Reminder Alarm</p>
-      <div class="row g-3 mb-4">
-        <div class="col-md-4">
-          <label for="reminderTime" class="form-label">Set Reminder Time</label>
-          <input type="time" class="form-control" id="reminderTime" />
-          <div class="form-text">Alarm fires on every page — even if you navigate away.</div>
-        </div>
-        <div class="col-md-4">
-          <label for="alarmTune" class="form-label">Alarm Tune</label>
-          <select class="form-select" id="alarmTune">
-            <option value="chime">🎵 Chime (default)</option>
-            <option value="beep">🔔 Double Beep</option>
-            <option value="melody">🎶 Melody</option>
+          <label for="rxMedType" class="form-label">Type</label>
+          <select class="form-select" id="rxMedType">
+            <option value="pill">&#128138; Pill / Tablet</option>
+            <option value="liquid">&#129396; Liquid / Syrup</option>
+            <option value="injection">&#128137; Injection</option>
+            <option value="patch">&#129657; Patch</option>
+            <option value="inhaler">Inhaler</option>
           </select>
-          <div class="form-text">Choose your preferred alarm sound.</div>
         </div>
-        <div class="col-md-4 d-flex flex-column justify-content-end">
-          <button type="button" class="btn btn-secondary-outline mb-1" onclick="testAlarmTune()">▶ Test Tune</button>
-          <div id="reminderStatus" style="font-size:0.8rem;color:var(--muted);"></div>
+        <div class="col-md-2">
+          <label for="rxDosage" class="form-label">Dosage</label>
+          <input type="text" class="form-control" id="rxDosage" placeholder="e.g. 500" />
+        </div>
+        <div class="col-md-2">
+          <label for="rxDosageUnit" class="form-label">Unit</label>
+          <select class="form-select" id="rxDosageUnit">
+            <option value="mg">mg</option>
+            <option value="mcg">mcg</option>
+            <option value="g">g</option>
+            <option value="ml">ml</option>
+            <option value="units">units</option>
+            <option value="IU">IU</option>
+          </select>
+        </div>
+      </div>
+
+      <p class="section-label">&#128197; Schedule</p>
+      <div class="row g-3 mb-3">
+        <div class="col-md-3">
+          <label for="rxStartDate" class="form-label">Start Date</label>
+          <input type="date" class="form-control" id="rxStartDate" />
+        </div>
+        <div class="col-md-3">
+          <label for="rxEndDate" class="form-label">End Date</label>
+          <input type="date" class="form-control" id="rxEndDate" />
+          <div class="form-text">Leave blank for ongoing.</div>
+        </div>
+        <div class="col-md-3">
+          <label for="rxWorkoutIntake" class="form-label">Workout Intake</label>
+          <select class="form-select" id="rxWorkoutIntake">
+            <option value="none">&#8212; None / Not applicable</option>
+            <option value="pre">Pre-workout</option>
+            <option value="post">Post-workout</option>
+            <option value="with_meal">With meal</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label for="rxAlarmTime" class="form-label">&#9200; Alarm Time</label>
+          <input type="time" class="form-control" id="rxAlarmTime" />
+          <div class="form-text">Browser will alert you daily at this time.</div>
+        </div>
+      </div>
+
+      <p class="section-label">&#127912; Visual Identification</p>
+      <div class="row g-3 mb-3">
+        <div class="col-md-6">
+          <label class="form-label">Pill Color</label>
+          <div class="pill-visual-row">
+            <div class="color-preview-wrap" title="Click to open color picker">
+              <div class="rx-color-swatch-preview" id="rxColorPreview">&#9679;</div>
+              <input type="color" id="rxPillColor" value="#0d9488" />
+            </div>
+            <div class="color-presets" id="rxColorPresets">
+              <div class="color-preset active" style="background:#0d9488;" data-color="#0d9488" title="Teal"></div>
+              <div class="color-preset" style="background:#3b82f6;" data-color="#3b82f6" title="Blue"></div>
+              <div class="color-preset" style="background:#8b5cf6;" data-color="#8b5cf6" title="Purple"></div>
+              <div class="color-preset" style="background:#ec4899;" data-color="#ec4899" title="Pink"></div>
+              <div class="color-preset" style="background:#ef4444;" data-color="#ef4444" title="Red"></div>
+              <div class="color-preset" style="background:#f97316;" data-color="#f97316" title="Orange"></div>
+              <div class="color-preset" style="background:#eab308;" data-color="#eab308" title="Yellow"></div>
+              <div class="color-preset" style="background:#22c55e;" data-color="#22c55e" title="Green"></div>
+              <div class="color-preset" style="background:#f8fafc;border:1.5px solid #e2e8f0;" data-color="#f8fafc" title="White"></div>
+              <div class="color-preset" style="background:#64748b;" data-color="#64748b" title="Gray"></div>
+            </div>
+          </div>
+          <div class="form-text mt-1">Click the circle or a preset to set the pill colour.</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Pill Shape</label>
+          <div class="shape-selector">
+            <input type="radio" name="rxPillShape" id="rxShapeRound"   class="shape-opt" value="round"   checked />
+            <label for="rxShapeRound"   title="Round">&#11044;</label>
+            <input type="radio" name="rxPillShape" id="rxShapeOval"    class="shape-opt" value="oval" />
+            <label for="rxShapeOval"    title="Oval">&#11035;</label>
+            <input type="radio" name="rxPillShape" id="rxShapeCapsule" class="shape-opt" value="capsule" />
+            <label for="rxShapeCapsule" title="Capsule">&#128138;</label>
+            <input type="radio" name="rxPillShape" id="rxShapeSquare"  class="shape-opt" value="square" />
+            <label for="rxShapeSquare"  title="Square">&#11036;</label>
+            <input type="radio" name="rxPillShape" id="rxShapeDiamond" class="shape-opt" value="diamond" />
+            <label for="rxShapeDiamond" title="Diamond">&#9830;</label>
+          </div>
+          <div class="form-text mt-1">Choose the physical shape for your dashboard card.</div>
+        </div>
+      </div>
+
+      <div class="row g-3 mb-4">
+        <div class="col-12">
+          <label for="rxNotes" class="form-label">Notes (optional)</label>
+          <textarea class="form-control" id="rxNotes" rows="2"
+                    placeholder="e.g. Take with food, avoid grapefruit, doctor's contact…"></textarea>
         </div>
       </div>
 
       <div class="d-flex align-items-center gap-3 pt-2 border-top" style="border-color:var(--border)!important;">
-        <button type="submit" class="btn btn-submit">&#9989;&nbsp; Save Medication Log</button>
+        <button type="submit" class="btn btn-submit" id="rxSaveBtn">&#9989;&nbsp; Save Prescription</button>
         <button type="reset"  class="btn btn-reset">&#8635; Reset</button>
-        <span class="ms-auto" style="font-size:0.75rem;color:var(--muted);">&#128274; Data saved to SQLite</span>
+        <span class="ms-auto" style="font-size:.75rem;color:var(--muted);">&#128274; Saved to SQLite</span>
       </div>
     </form>
+  </div>
+
+  <!-- ═══ SECTION 2: CURRENT PRESCRIPTIONS DASHBOARD ═══ -->
+  <div class="rx-dashboard-wrap">
+    <div class="rx-dashboard-header">
+      <span>&#128138; Current Prescriptions &nbsp;<span class="rx-count-badge" id="rxCount">0</span></span>
+      <button class="btn btn-sm" style="border:1.5px solid var(--border);border-radius:.5rem;font-size:.8rem;font-weight:600;color:var(--muted);"
+              onclick="rxRefreshDashboard()">&#8635; Refresh</button>
+    </div>
+    <div class="rx-empty" id="rxEmptyState">
+      <div class="rx-empty-icon">&#128138;</div>
+      <div class="rx-empty-text">No prescriptions saved yet. Add one above!</div>
+    </div>
+    <div class="rx-grid" id="rxDashboardGrid"></div>
+  </div>
+
+  <!-- ═══ SECTION 3: MEDICATION COMPLETION HISTORY ═══ -->
+  <div class="form-card" id="medHistoryCard">
+    <div class="form-card-header" style="display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <h5 id="medHistoryTitle">Today's Scheduled Medications</h5>
+        <small id="medHistorySubtitle">Mark each medication as taken to log completion.</small>
+      </div>
+      <div style="display:flex;gap:.5rem;align-items:center;">
+        <button class="btn btn-sm" id="medHistoryTodayBtn"
+                style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:.45rem;font-size:.78rem;font-weight:600;padding:.3rem .8rem;"
+                onclick="showMedDay('today')">Today</button>
+        <button class="btn btn-sm" id="medHistoryAllBtn"
+                style="background:transparent;border:1px solid rgba(255,255,255,.3);color:rgba(255,255,255,.7);border-radius:.45rem;font-size:.78rem;font-weight:600;padding:.3rem .8rem;"
+                onclick="showMedDay('history')">History</button>
+      </div>
+    </div>
+    <div class="form-card-body" id="medHistoryBody">
+      <!-- injected by JS -->
+    </div>
+  </div>
+
+  <!-- hidden form for medForm (keeps app.js compatibility) -->
+  <form id="medForm" style="display:none;" onsubmit="event.preventDefault();"></form>
+
+  <!-- reminder alarm section (kept below history card) -->
+  <div class="form-card">
+    <div class="form-card-header">
+      <h5>Daily Reminder Alarm</h5>
+      <small>Global alarm fires across all pages.</small>
+    </div>
+    <div class="form-card-body">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label for="reminderTime" class="form-label">Reminder Time</label>
+          <input type="time" class="form-control" id="reminderTime" />
+          <div class="form-text">Fires a browser alert at this time daily.</div>
+        </div>
+        <div class="col-md-4">
+          <label for="alarmTune" class="form-label">Alarm Tune</label>
+          <select class="form-select" id="alarmTune">
+            <option value="chime">Chime (default)</option>
+            <option value="beep">Double Beep</option>
+            <option value="melody">Melody</option>
+          </select>
+        </div>
+        <div class="col-md-4 d-flex flex-column justify-content-end">
+          <button type="button" class="btn btn-submit mb-1" onclick="testAlarmTune()">Test Tune</button>
+          <div id="reminderStatus" style="font-size:.8rem;color:var(--muted);"></div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="js/app.js"></script>
 <script src="js/api.js"></script>
+<script src="js/prescription_alarm.js"></script>
 <script>
-function testAlarmTune() {
-  const tune = document.getElementById('alarmTune').value;
-  playTune(tune);
+/* ═══════════════════════════════════════════
+   MED COMPLETION HISTORY
+═══════════════════════════════════════════ */
+
+var MED_COMP_KEY = 'ft_med_completion'; // { 'YYYY-MM-DD': { rxId: { done: bool, at: 'HH:MM' } } }
+
+function _getTodayKey() {
+  return new Date().toISOString().slice(0, 10);
 }
+
+function _loadComp() {
+  try { return JSON.parse(localStorage.getItem(MED_COMP_KEY) || '{}'); } catch { return {}; }
+}
+
+function _saveComp(data) {
+  localStorage.setItem(MED_COMP_KEY, JSON.stringify(data));
+}
+
+function _getRxList() {
+  /* prescription_alarm.js stores items in 'ft_rx_list' */
+  try { return JSON.parse(localStorage.getItem('ft_rx_list') || '[]'); } catch { return []; }
+}
+
+function showMedDay(mode) {
+  /* button highlight */
+  var todayBtn = document.getElementById('medHistoryTodayBtn');
+  var allBtn   = document.getElementById('medHistoryAllBtn');
+  var title    = document.getElementById('medHistoryTitle');
+  var subtitle = document.getElementById('medHistorySubtitle');
+
+  if (mode === 'today') {
+    if (todayBtn) { todayBtn.style.background = 'rgba(255,255,255,.18)'; todayBtn.style.color = '#fff'; }
+    if (allBtn)   { allBtn.style.background   = 'transparent'; allBtn.style.color   = 'rgba(255,255,255,.7)'; }
+    if (title)    title.textContent   = "Today's Scheduled Medications";
+    if (subtitle) subtitle.textContent = 'Mark each medication as taken to log completion.';
+    _renderToday();
+  } else {
+    if (allBtn)   { allBtn.style.background   = 'rgba(255,255,255,.18)'; allBtn.style.color   = '#fff'; }
+    if (todayBtn) { todayBtn.style.background = 'transparent'; todayBtn.style.color = 'rgba(255,255,255,.7)'; }
+    if (title)    title.textContent   = 'Medication Completion History';
+    if (subtitle) subtitle.textContent = 'Your medication schedule over the last 7 days.';
+    _renderHistory();
+  }
+}
+
+function _renderToday() {
+  var body  = document.getElementById('medHistoryBody');
+  if (!body) return;
+  var rxList  = _getRxList();
+  var todayKey = _getTodayKey();
+  var comp    = _loadComp();
+  var dayComp = comp[todayKey] || {};
+
+  if (rxList.length === 0) {
+    body.innerHTML = '<div class="med-hist-empty"><div class="empty-icon">&#128138;</div><div>No prescriptions saved yet. Add one above to track completion.</div></div>';
+    return;
+  }
+
+  var now = new Date();
+  var html = '<div class="med-history-list">';
+  rxList.forEach(function(rx) {
+    var isDone = !!(dayComp[rx.id] && dayComp[rx.id].done);
+    var doneAt = isDone ? dayComp[rx.id].at : null;
+    var alarmLabel = rx.alarmTime ? rx.alarmTime : (rx.workoutIntake !== 'none' ? rx.workoutIntake : 'anytime');
+    html += '<div class="med-hist-row' + (isDone ? ' done' : '') + '" onclick="toggleMedDone(\'' + rx.id + '\')" id="mhr-' + rx.id + '">';
+    html += '  <div class="mhr-check">' + (isDone ? '&#10003;' : '') + '</div>';
+    html += '  <div class="mhr-info">';
+    html += '    <div class="mhr-name">' + _esc(rx.name) + '</div>';
+    html += '    <div class="mhr-meta">' + _esc(rx.dosage || '') + (rx.dosage ? ' ' + _esc(rx.dosageUnit || '') : '') + ' &middot; ' + _esc(rx.type || 'pill') + '</div>';
+    html += '  </div>';
+    html += '  <div style="text-align:right">';
+    html += '    <div class="mhr-time">' + _esc(alarmLabel) + '</div>';
+    if (isDone) html += '    <div class="mhr-done-stamp">Taken at ' + doneAt + '</div>';
+    html += '  </div>';
+    html += '</div>';
+  });
+  html += '</div>';
+
+  var done   = rxList.filter(function(rx){ return !!(dayComp[rx.id] && dayComp[rx.id].done); }).length;
+  var total  = rxList.length;
+  html += '<div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">';
+  html += '  <span style="font-size:.82rem;color:var(--muted);">Today&rsquo;s progress</span>';
+  html += '  <span style="font-size:.82rem;font-weight:700;color:' + (done === total ? 'var(--primary)' : 'var(--muted)') + '">' + done + ' / ' + total + ' completed' + (done === total ? ' &#10003; All done!' : '') + '</span>';
+  html += '</div>';
+
+  body.innerHTML = html;
+}
+
+function _renderHistory() {
+  var body = document.getElementById('medHistoryBody');
+  if (!body) return;
+  var rxList = _getRxList();
+  var comp   = _loadComp();
+
+  /* last 7 days */
+  var days = [];
+  for (var i = 0; i < 7; i++) {
+    var d = new Date();
+    d.setDate(d.getDate() - i);
+    days.push(d.toISOString().slice(0, 10));
+  }
+
+  if (rxList.length === 0) {
+    body.innerHTML = '<div class="med-hist-empty"><div class="empty-icon">&#128203;</div><div>No prescriptions added yet. Add prescriptions above to see history.</div></div>';
+    return;
+  }
+
+  var html = '';
+  days.forEach(function(dayKey) {
+    var dayComp = comp[dayKey] || {};
+    var done    = rxList.filter(function(rx){ return !!(dayComp[rx.id] && dayComp[rx.id].done); }).length;
+    var missed  = rxList.length - done;
+    var label   = dayKey === _getTodayKey() ? 'Today' :
+                  dayKey === _getYesterdayKey() ? 'Yesterday' :
+                  new Date(dayKey + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: '2-digit', month: 'short' });
+    html += '<div class="med-day-group">';
+    html += '  <div class="med-day-label">' + label + ' &mdash; ' + dayKey + '</div>';
+    html += '  <div class="med-day-summary">';
+    html += '    <span>';
+    rxList.forEach(function(rx) {
+      var isDone = !!(dayComp[rx.id] && dayComp[rx.id].done);
+      var at     = isDone ? dayComp[rx.id].at : null;
+      html += '    <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;">';
+      html += '      <span style="width:14px;height:14px;border-radius:50%;background:' + (isDone ? 'var(--primary)' : '#e2e8f0') + ';display:inline-block;flex-shrink:0;"></span>';
+      html += '      <span style="font-size:.82rem;color:var(--muted);">' + _esc(rx.name) + (at ? ' <span style="color:var(--primary);font-weight:600;">&#10003; ' + at + '</span>' : ' <span style="color:#ef4444;">missed</span>') + '</span>';
+      html += '    </div>';
+    });
+    html += '    </span>';
+    html += '    <div style="text-align:right;min-width:80px">';
+    if (done > 0)   html += '<span class="med-done-badge">'   + done   + ' done</span><br/>';
+    if (missed > 0) html += '<span class="med-missed-badge">' + missed + ' missed</span>';
+    html += '    </div>';
+    html += '  </div>';
+    html += '</div>';
+  });
+  body.innerHTML = html || '<div class="med-hist-empty">No history yet.</div>';
+}
+
+function _getYesterdayKey() {
+  var d = new Date(); d.setDate(d.getDate() - 1);
+  return d.toISOString().slice(0, 10);
+}
+
+function toggleMedDone(rxId) {
+  var todayKey = _getTodayKey();
+  var comp     = _loadComp();
+  if (!comp[todayKey]) comp[todayKey] = {};
+  var was      = !!(comp[todayKey][rxId] && comp[todayKey][rxId].done);
+  if (was) {
+    delete comp[todayKey][rxId];
+  } else {
+    var now = new Date();
+    comp[todayKey][rxId] = { done: true, at: String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0') };
+  }
+  _saveComp(comp);
+  _renderToday();
+}
+
+function _esc(s) {
+  return String(s || '').replace(/[&<>"']/g, function(c) {
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+/* Init on load */
+document.addEventListener('DOMContentLoaded', function() {
+  showMedDay('today');
+});
+
+/* Color preset click handler */
+document.querySelectorAll('.color-preset').forEach(function(swatch) {
+  swatch.addEventListener('click', function() {
+    var color   = this.getAttribute('data-color');
+    var colorEl = document.getElementById('rxPillColor');
+    var preview = document.getElementById('rxColorPreview');
+    if (colorEl) colorEl.value = color;
+    if (preview) { preview.style.background = color; preview.style.boxShadow = '0 4px 14px ' + color + '66'; }
+    document.querySelectorAll('.color-preset').forEach(function(s) { s.classList.remove('active'); });
+    this.classList.add('active');
+  });
+});
+
+/* Alarm tune test */
+function testAlarmTune() { var t = document.getElementById('alarmTune').value; playTune(t); }
 function playTune(tune) {
   try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const t = ctx.currentTime;
-    function note(freq, start, dur, type='sine') {
-      const o = ctx.createOscillator(), g = ctx.createGain();
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    var t = ctx.currentTime;
+    function note(freq, start, dur, type) {
+      type = type || 'sine';
+      var o = ctx.createOscillator(), g = ctx.createGain();
       o.connect(g); g.connect(ctx.destination);
       o.type = type; o.frequency.value = freq;
       g.gain.setValueAtTime(0.5, start);
       g.gain.exponentialRampToValueAtTime(0.001, start + dur);
       o.start(start); o.stop(start + dur);
     }
-    if (tune === 'beep') {
-      note(880, t, 0.2); note(880, t+0.3, 0.2);
-    } else if (tune === 'melody') {
-      [523,587,659,698,784].forEach((f,i)=>note(f,t+i*0.18,0.15));
-    } else {
-      note(523.25,t,0.25); note(659.25,t+0.3,0.25); note(783.99,t+0.6,0.25); note(1046.5,t+0.9,0.5);
-    }
+    if (tune === 'beep') { note(880,t,0.2); note(880,t+0.3,0.2); }
+    else if (tune === 'melody') { [523,587,659,698,784].forEach(function(f,i){ note(f,t+i*0.18,0.15); }); }
+    else { note(523.25,t,0.25); note(659.25,t+0.3,0.25); note(783.99,t+0.6,0.25); note(1046.5,t+0.9,0.5); }
   } catch(e){}
 }
-// Override playReminderBeep to respect tune selection
 window.playReminderBeep = function() {
-  const tune = (document.getElementById('alarmTune') || {}).value || 'chime';
+  var tune = (document.getElementById('alarmTune') || {}).value || 'chime';
   playTune(tune);
 };
 </script>

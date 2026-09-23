@@ -1,5 +1,5 @@
 -- ============================================================
---  FitTrack – SQLite Schema
+--  FitTent – SQLite Schema
 --  File: schema.sql
 --  Run automatically by server.py on first launch.
 -- ============================================================
@@ -8,8 +8,14 @@
 CREATE TABLE IF NOT EXISTS users (
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
     name          TEXT    NOT NULL DEFAULT '',
-    email         TEXT             DEFAULT '',
+    email         TEXT    UNIQUE   DEFAULT '',
     age           INTEGER          DEFAULT NULL,
+    -- Authentication
+    password_hash TEXT             DEFAULT NULL,
+    auth_provider TEXT    NOT NULL DEFAULT 'local', -- local | google | apple | phone
+    provider_id   TEXT             DEFAULT NULL,    -- OAuth subject ID
+    phone         TEXT             DEFAULT NULL,
+    is_active     INTEGER NOT NULL DEFAULT 1,
     -- Daily goals
     goal_steps    INTEGER NOT NULL DEFAULT 10000,
     goal_water    REAL    NOT NULL DEFAULT 3.0,
@@ -40,6 +46,9 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at    TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users (email) WHERE email != '';
+
+
 -- ── Health / Workout Logs table ───────────────────────────────
 CREATE TABLE IF NOT EXISTS logs (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -63,3 +72,24 @@ CREATE TABLE IF NOT EXISTS logs (
 CREATE INDEX IF NOT EXISTS idx_logs_date    ON logs (log_date);
 CREATE INDEX IF NOT EXISTS idx_logs_workout ON logs (workout_type);
 CREATE INDEX IF NOT EXISTS idx_logs_user    ON logs (user_id);
+
+-- ── Prescriptions table ───────────────────────────────────
+CREATE TABLE IF NOT EXISTS prescriptions (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id         INTEGER NOT NULL DEFAULT 1,
+    med_name        TEXT    NOT NULL,
+    med_type        TEXT    NOT NULL DEFAULT 'pill',   -- pill | liquid | injection | patch | inhaler
+    dosage          TEXT    NOT NULL DEFAULT '',        -- numeric value e.g. "500"
+    dosage_unit     TEXT    NOT NULL DEFAULT 'mg',      -- mg | ml | units | mcg | g
+    start_date      TEXT             DEFAULT NULL,
+    end_date        TEXT             DEFAULT NULL,
+    workout_intake  TEXT             DEFAULT 'none',    -- pre | post | with_meal | none
+    alarm_time      TEXT             DEFAULT NULL,      -- HH:MM 24-h
+    pill_color      TEXT             DEFAULT '#0d9488', -- CSS hex color for visual swatch
+    pill_shape      TEXT             DEFAULT 'round',   -- round | oval | capsule | square | diamond
+    notes           TEXT             DEFAULT NULL,
+    created_at      TEXT    NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_rx_user ON prescriptions (user_id);

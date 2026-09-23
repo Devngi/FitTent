@@ -1,5 +1,5 @@
 /**
- * api.js — FitTrack SQLite API Bridge
+ * api.js — FitTent SQLite API Bridge
  * ====================================
  * Single source of truth for all async page initialisation.
  * All data flows: Browser ← Flask ← SQLite (no localStorage).
@@ -26,11 +26,18 @@ window.FT = window.FT || { profile: null };
 async function apiFetch(path, method = 'GET', body = null) {
   const options = {
     method,
+    credentials: 'include',   // send session cookie on every request
     headers: { 'Content-Type': 'application/json' },
   };
   if (body) options.body = JSON.stringify(body);
 
   const response = await fetch(API_BASE + path, options);
+
+  if (response.status === 401) {
+    // Session expired or not logged in — redirect to login
+    window.location.href = '/login.html';
+    return;
+  }
 
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));
@@ -42,10 +49,36 @@ async function apiFetch(path, method = 'GET', body = null) {
   return response.json();
 }
 
-
 /* ════════════════════════════════════════════
-   THEME  (sessionStorage cache — synchronous)
+   AUTH GUARD — call on every protected page
 ════════════════════════════════════════════ */
+
+/**
+ * Verifies that the user has an active session.
+ * Redirects to /login.html if not authenticated.
+ * Call this at the top of each page's boot sequence.
+ */
+async function apiCheckAuth() {
+  try {
+    const user = await fetch(API_BASE + '/auth/me', { credentials: 'include' });
+    if (!user.ok) {
+      window.location.href = '/login.html';
+      return null;
+    }
+    return user.json();
+  } catch {
+    window.location.href = '/login.html';
+    return null;
+  }
+}
+
+/** Call this to log out and redirect to login page. */
+async function apiLogout() {
+  await fetch(API_BASE + '/auth/logout', { method: 'POST', credentials: 'include' });
+  window.location.href = '/login.html?msg=Logged+out+successfully';
+}
+
+
 
 /** Called synchronously at page-start — zero flash */
 function applyThemeCached() {
@@ -112,7 +145,7 @@ async function apiLoadProfile() {
     applyThemeFromProfile(profile);
     return profile;
   } catch (err) {
-    console.warn('[FitTrack] Profile load failed:', err.message);
+    console.warn('[FitTent] Profile load failed:', err.message);
     return null;
   }
 }
@@ -150,10 +183,10 @@ async function apiSaveProfile() {
     window.FT.profile = updated;
     // Keep sessionStorage in sync with the freshly saved value
     sessionStorage.setItem('ft_theme', updated.theme || 'light');
-    console.info('[FitTrack] Profile saved to SQLite');
+    console.info('[FitTent] Profile saved to SQLite');
     return updated;
   } catch (err) {
-    console.warn('[FitTrack] Profile save failed:', err.message);
+    console.warn('[FitTent] Profile save failed:', err.message);
     return null;
   }
 }
@@ -182,10 +215,10 @@ async function apiSaveLog(entry) {
 
   try {
     const saved = await apiFetch('/logs', 'POST', payload);
-    console.info('[FitTrack] Log saved, id =', saved.id);
+    console.info('[FitTent] Log saved, id =', saved.id);
     return saved;
   } catch (err) {
-    console.warn('[FitTrack] Log save failed:', err.message);
+    console.warn('[FitTent] Log save failed:', err.message);
     return null;
   }
 }
@@ -209,10 +242,10 @@ async function apiUpdateLog(logId, entry) {
 
   try {
     const updated = await apiFetch(`/logs/${logId}`, 'PUT', payload);
-    console.info('[FitTrack] Log updated, id =', updated.id);
+    console.info('[FitTent] Log updated, id =', updated.id);
     return updated;
   } catch (err) {
-    console.warn('[FitTrack] Log update failed:', err.message);
+    console.warn('[FitTent] Log update failed:', err.message);
     return null;
   }
 }
@@ -229,7 +262,7 @@ async function apiFetchLogs(filters = {}) {
 
   try {
     const rows = await apiFetch(`/logs${query}`);
-    console.info(`[FitTrack] Fetched ${rows.length} logs from SQLite`);
+    console.info(`[FitTent] Fetched ${rows.length} logs from SQLite`);
     return rows.map(r => ({
       id:        r.id,
       date:      r.log_date,        // ← unified field name used by app.js
@@ -246,7 +279,7 @@ async function apiFetchLogs(filters = {}) {
       medications: r.medications_taken,
     }));
   } catch (err) {
-    console.warn('[FitTrack] Fetch logs failed:', err.message);
+    console.warn('[FitTent] Fetch logs failed:', err.message);
     return [];
   }
 }
@@ -256,7 +289,7 @@ async function apiDeleteLog(dbId) {
     await apiFetch(`/logs/${dbId}`, 'DELETE');
     return true;
   } catch (err) {
-    console.warn('[FitTrack] Delete failed:', err.message);
+    console.warn('[FitTent] Delete failed:', err.message);
     return false;
   }
 }
@@ -280,7 +313,7 @@ async function apiRefreshDataStats() {
     setText('ds_topWorkout', s.top_workout || '—');
     setText('ds_storage',    'SQLite DB');
   } catch (err) {
-    console.warn('[FitTrack] Stats load failed:', err.message);
+    console.warn('[FitTent] Stats load failed:', err.message);
   }
 }
 
@@ -330,7 +363,7 @@ async function apiLoadDashboardGoals() {
     if (scoreGoal) scoreGoal.textContent = `${met}/3 goals met`;
 
   } catch (err) {
-    console.warn('[FitTrack] Dashboard goals load failed:', err.message);
+    console.warn('[FitTent] Dashboard goals load failed:', err.message);
   }
 }
 
@@ -383,11 +416,11 @@ function _fireAlarm(time) {
   if (typeof playReminderBeep === 'function') playReminderBeep();
 
   if ('Notification' in window && Notification.permission === 'granted') {
-    new Notification('💊 FitTrack Medication Reminder', {
+    new Notification('💊 FitTent Medication Reminder', {
       body: `Time to take your medication! (Scheduled: ${time})`,
     });
   } else {
-    alert(`💊 FitTrack Reminder\n\nTime to take your medication!\n(Scheduled: ${time})`);
+    alert(`💊 FitTent Reminder\n\nTime to take your medication!\n(Scheduled: ${time})`);
   }
 
   const statusEl = document.getElementById('reminderStatus');
@@ -483,11 +516,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (typeof renderHistoryTable === 'function') renderHistoryTable();
 
     /* ── Trend Line Chart ── */
-    /* Try data.json first (richer: has mood text, workout details).
-       Falls back to GLOBAL_LOGS automatically inside charts.js. */
-    if (typeof renderTrendFromAPI === 'function') {
-      renderTrendFromAPI('steps');
-    } else if (typeof renderTrendChart === 'function') {
+    /* Use GLOBAL_LOGS directly — guaranteed real DB data with correct 1-5 mood values */
+    if (typeof renderTrendChart === 'function') {
       renderTrendChart(GLOBAL_LOGS, 'steps');
     }
   }

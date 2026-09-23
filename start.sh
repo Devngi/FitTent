@@ -1,5 +1,5 @@
 #!/bin/bash
-# FitTrack Startup Script
+# FitTent Startup Script
 # This script starts the Flask backend server which automatically serves the frontend files.
 
 cd "$(dirname "$0")/backend"
@@ -10,5 +10,5 @@ if [ -f "../requirements.txt" ]; then
 fi
 
 # Run the server
-echo "Starting FitTrack..."
+echo "Starting FitTent..."
 python3 server.py
