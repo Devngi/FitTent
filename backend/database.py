@@ -85,6 +85,10 @@ def init_db() -> None:
 
         # ── Seed demo account on first run ────────────────────────
         from werkzeug.security import generate_password_hash
+        
+        # Ensure sequence is in sync (fixes id=1 duplicate error)
+        conn.cursor().execute("SELECT setval(pg_get_serial_sequence('users', 'id'), COALESCE((SELECT MAX(id) FROM users) + 1, 1), false);")
+        
         cur = _cursor(conn)
         cur.execute("SELECT id FROM users WHERE email = 'demo@fittent.app'")
         if cur.fetchone() is None:
