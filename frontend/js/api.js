@@ -1,19 +1,20 @@
 /**
- * api.js — FitTent SQLite API Bridge
+ * api.js — FitTent API Bridge
  * ====================================
  * Single source of truth for all async page initialisation.
- * All data flows: Browser ← Flask ← SQLite (no localStorage).
+ * All data flows: Browser ← Flask ← PostgreSQL (no localStorage).
  *
  * Boot order on every page:
  *   1. Apply theme from sessionStorage cache (SYNC — zero flash)
- *   2. Fetch profile from SQLite (async) → update cache + re-apply theme
+ *   2. Fetch profile from API (async) → update cache + re-apply theme
  *   3. Start alarm checker on every page
  *   4. Page-specific: fetch data → call app.js init functions → render
  */
 
 'use strict';
 
-const API_BASE = 'http://127.0.0.1:5002/api';
+// Dynamically resolve API base so the same code works on localhost AND on Render
+const API_BASE = window.location.origin + '/api';
 
 /* ── Global profile cache ──────────────────────────────────── */
 window.FT = window.FT || { profile: null };
