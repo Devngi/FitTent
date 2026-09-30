@@ -314,12 +314,21 @@ def api_insert_log():
     errors = []
     for field in ("steps", "water_intake", "sleep_hours"):
         if field in data and data[field] is not None:
-            if float(data[field]) < 0:
-                errors.append(f"{field} cannot be negative")
+            try:
+                if float(data[field]) < 0:
+                    errors.append(f"{field} cannot be negative")
+            except (TypeError, ValueError):
+                pass
     if errors:
         return jsonify({"error": "Validation failed", "details": errors}), 400
-    new_row = db.insert_log(data, user_id=current_user_id())
-    return jsonify(new_row), 201
+    try:
+        new_row = db.insert_log(data, user_id=current_user_id())
+        return jsonify(new_row), 201
+    except Exception as e:
+        import traceback
+        print(f"[FitTent] ERROR inserting log for user {current_user_id()}: {e}")
+        traceback.print_exc()
+        return jsonify({"error": f"Database error: {str(e)}"}), 500
 
 @app.route("/api/logs/<int:log_id>", methods=["PUT"])
 @login_required
@@ -328,14 +337,23 @@ def api_update_log(log_id):
     errors = []
     for field in ("steps", "water_intake", "sleep_hours"):
         if field in data and data[field] is not None:
-            if float(data[field]) < 0:
-                errors.append(f"{field} cannot be negative")
+            try:
+                if float(data[field]) < 0:
+                    errors.append(f"{field} cannot be negative")
+            except (TypeError, ValueError):
+                pass
     if errors:
         return jsonify({"error": "Validation failed", "details": errors}), 400
-    updated = db.update_log(log_id, data, user_id=current_user_id())
-    if updated:
-        return jsonify(updated), 200
-    return jsonify({"error": "Log not found"}), 404
+    try:
+        updated = db.update_log(log_id, data, user_id=current_user_id())
+        if updated:
+            return jsonify(updated), 200
+        return jsonify({"error": "Log not found"}), 404
+    except Exception as e:
+        import traceback
+        print(f"[FitTent] ERROR updating log {log_id} for user {current_user_id()}: {e}")
+        traceback.print_exc()
+        return jsonify({"error": f"Database error: {str(e)}"}), 500
 
 @app.route("/api/logs/<int:log_id>", methods=["DELETE"])
 @login_required
@@ -376,15 +394,26 @@ def api_insert_prescription():
         return jsonify(new_rx), 201
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        import traceback
+        print(f"[FitTent] ERROR inserting prescription for user {current_user_id()}: {e}")
+        traceback.print_exc()
+        return jsonify({"error": f"Database error: {str(e)}"}), 500
 
 @app.route("/api/prescriptions/<int:rx_id>", methods=["PUT"])
 @login_required
 def api_update_prescription(rx_id):
     data = request.get_json(silent=True) or {}
-    updated = db.update_prescription(rx_id, data, user_id=current_user_id())
-    if updated:
-        return jsonify(updated), 200
-    return jsonify({"error": "Prescription not found"}), 404
+    try:
+        updated = db.update_prescription(rx_id, data, user_id=current_user_id())
+        if updated:
+            return jsonify(updated), 200
+        return jsonify({"error": "Prescription not found"}), 404
+    except Exception as e:
+        import traceback
+        print(f"[FitTent] ERROR updating prescription {rx_id}: {e}")
+        traceback.print_exc()
+        return jsonify({"error": f"Database error: {str(e)}"}), 500
 
 @app.route("/api/prescriptions/<int:rx_id>", methods=["DELETE"])
 @login_required
