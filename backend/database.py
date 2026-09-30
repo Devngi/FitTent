@@ -170,7 +170,7 @@ def insert_log(data: dict, user_id: int = 1) -> dict:
     fields["created_at"] = datetime.utcnow().isoformat()
     if "log_date" not in fields: fields["log_date"] = datetime.utcnow().strftime("%Y-%m-%d")
     columns      = ", ".join(fields.keys())
-    placeholders = ", ".join("%s" * len(fields))
+    placeholders = ", ".join(["%s"] * len(fields))
     with get_connection() as conn:
         cur = conn.cursor()
         cur.execute(f"INSERT INTO logs ({columns}) VALUES ({placeholders}) RETURNING id", list(fields.values()))
@@ -274,7 +274,7 @@ def insert_prescription(data: dict, user_id: int = 1) -> dict:
     fields["user_id"]    = user_id
     fields["created_at"] = datetime.utcnow().isoformat()
     columns      = ", ".join(fields.keys())
-    placeholders = ", ".join("%s" * len(fields))
+    placeholders = ", ".join(["%s"] * len(fields))
     with get_connection() as conn:
         cur = conn.cursor()
         cur.execute(f"INSERT INTO prescriptions ({columns}) VALUES ({placeholders}) RETURNING id", list(fields.values()))
