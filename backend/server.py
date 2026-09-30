@@ -44,12 +44,23 @@ app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path="")
 # Fix for Render (HTTPS proxy) to ensure secure cookies work
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
-# ── Session & Security Config ─────────────────────────────────
-# In production: set SECRET_KEY in .env to a long random string.
-app.secret_key = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
-
-# Detect production: when running on Render, PORT env var is set.
+# Detect production: when running on Render, RENDER env var is set.
 _IS_PRODUCTION = bool(os.environ.get("RENDER") or os.environ.get("PORT"))
+
+# ── Session & Security Config ─────────────────────────────────
+# In production: SECRET_KEY MUST be set as a Render env var.
+# A random key generated at startup invalidates all sessions on every restart.
+_secret_key = os.environ.get("SECRET_KEY", "")
+if not _secret_key or _secret_key == "change-me-to-a-long-random-string":
+    if _IS_PRODUCTION:
+        raise RuntimeError(
+            "[FitTent] SECRET_KEY is not set! "
+            "Add a real SECRET_KEY to your Render environment variables. "
+            "Generate one with: python3 -c \"import secrets; print(secrets.token_hex(32))\""
+        )
+    # In local dev, use a temporary key (sessions won't persist across restarts)
+    _secret_key = secrets.token_hex(32)
+app.secret_key = _secret_key
 
 app.config.update(
     SESSION_COOKIE_HTTPONLY  = True,

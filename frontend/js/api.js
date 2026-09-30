@@ -184,7 +184,7 @@ async function apiSaveProfile() {
     window.FT.profile = updated;
     // Keep sessionStorage in sync with the freshly saved value
     sessionStorage.setItem('ft_theme', updated.theme || 'light');
-    console.info('[FitTent] Profile saved to SQLite');
+    console.info('[FitTent] Profile saved to PostgreSQL');
     return updated;
   } catch (err) {
     console.warn('[FitTent] Profile save failed:', err.message);
@@ -251,7 +251,7 @@ async function apiUpdateLog(logId, entry) {
   }
 }
 
-/** Fetch logs from SQLite and normalise column names for app.js */
+/** Fetch logs from PostgreSQL and normalise column names for app.js */
 async function apiFetchLogs(filters = {}) {
   const params = new URLSearchParams();
   if (filters.dateFrom) params.set('date_from', filters.dateFrom);
@@ -312,7 +312,7 @@ async function apiRefreshDataStats() {
     setText('ds_avgSleep',   s.avg_sleep  ? s.avg_sleep  + ' hrs' : '—');
     setText('ds_avgWater',   s.avg_water  ? s.avg_water  + ' L'   : '—');
     setText('ds_topWorkout', s.top_workout || '—');
-    setText('ds_storage',    'SQLite DB');
+    setText('ds_storage',    'PostgreSQL');
   } catch (err) {
     console.warn('[FitTent] Stats load failed:', err.message);
   }
