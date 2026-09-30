@@ -83,10 +83,48 @@ def init_db() -> None:
             CREATE INDEX IF NOT EXISTS idx_rx_user ON prescriptions (user_id);
         """)
 
+        # ── Seed demo account on first run ────────────────────────
+        from werkzeug.security import generate_password_hash
         cur = _cursor(conn)
-        cur.execute("SELECT id FROM users WHERE id = 1")
+        cur.execute("SELECT id FROM users WHERE email = 'demo@fittent.app'")
         if cur.fetchone() is None:
-            conn.cursor().execute("INSERT INTO users (id, name) VALUES (1, '')")
+            demo_hash = generate_password_hash("Demo@1234")
+            conn.cursor().execute("""
+                INSERT INTO users (
+                    name, email, password_hash, auth_provider,
+                    goal_steps, goal_water, goal_sleep, goal_workout_days,
+                    age, gender, height, weight, bio, is_active
+                ) VALUES (
+                    'Demo User', 'demo@fittent.app', %s, 'local',
+                    10000, 3.0, 8.0, 4,
+                    25, 'male', 175.0, 72.0,
+                    'This is the FitTent demo account. Feel free to explore!', 1
+                )
+            """, (demo_hash,))
+            # Fetch the new demo user's id
+            cur2 = _cursor(conn)
+            cur2.execute("SELECT id FROM users WHERE email = 'demo@fittent.app'")
+            demo_id = cur2.fetchone()["id"]
+            # Seed sample workout logs for the past 7 days
+            import datetime as _dt
+            sample_logs = [
+                ("Running",    30, "moderate", 8200, 2.5, 7.0, "good",     7),
+                ("Cycling",    45, "high",      6500, 3.0, 6.5, "great",    7),
+                ("Yoga",       60, "low",        3000, 2.0, 8.5, "calm",    7),
+                ("Swimming",   40, "high",       5000, 3.5, 7.5, "tired",   7),
+                ("Walking",    20, "low",        9000, 2.8, 8.0, "good",    7),
+                ("Gym",        50, "high",       4500, 3.2, 6.0, "great",   7),
+                ("Running",    35, "moderate",   7800, 2.6, 7.0, "good",    7),
+            ]
+            for i, (wtype, wdur, wint, steps, water, sleep, mood, _) in enumerate(sample_logs):
+                log_date = (_dt.date.today() - _dt.timedelta(days=i)).isoformat()
+                conn.cursor().execute("""
+                    INSERT INTO logs (user_id, log_date, workout_type, workout_duration,
+                        workout_intensity, steps, water_intake, sleep_hours, mood, energy_level, created_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, (demo_id, log_date, wtype, wdur, wint, steps, water, sleep, mood, 7,
+                      _dt.datetime.utcnow().isoformat()))
+            print("[FitTent] Demo account seeded → demo@fittent.app / Demo@1234")
 
         conn.commit()
     print("[FitTent] PostgreSQL database ready.")

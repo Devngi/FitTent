@@ -2,6 +2,15 @@
 
 FitTent is a comprehensive health and fitness tracking web application. It allows users to log workouts, track water intake, manage medications, monitor sleep, and track overall daily goals.
 
+## 🔑 Demo Account
+A demo account with pre-filled data is automatically created on first server startup. You can log in at [https://fittent.onrender.com](https://fittent.onrender.com) using:
+
+| Field | Value |
+|---|---|
+| **Email** | `demo@fittent.app` |
+| **Password** | `Demo@1234` |
+
+
 ## 🏗️ Architecture & Tech Stack
 
 FitTent uses a lightweight, robust, and highly scalable architecture:
