@@ -38,7 +38,11 @@ except ImportError:
 BACKEND_DIR  = os.path.dirname(os.path.abspath(__file__))
 FRONTEND_DIR = os.path.join(BACKEND_DIR, '..', 'frontend')
 
+from werkzeug.middleware.proxy_fix import ProxyFix
+
 app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path="")
+# Fix for Render (HTTPS proxy) to ensure secure cookies work
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 # ── Session & Security Config ─────────────────────────────────
 # In production: set SECRET_KEY in .env to a long random string.
