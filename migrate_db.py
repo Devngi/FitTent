@@ -6,7 +6,7 @@ import sys
 # ⚠️ ACTION REQUIRED: Paste your Render "External Database URL" below
 # (You can find it on the Render Dashboard under your PostgreSQL database settings)
 # ==============================================================================
-RENDER_DB_URL = "postgres://YOUR_EXTERNAL_URL_HERE"
+RENDER_DB_URL = "postgresql://fittent_db_user:BKOVq601GF7SuvcQXvece5VWOCcXpXUu@dpg-dau8hk2d0e5s73en0sf0-a.oregon-postgres.render.com/fittent_db"
 
 
 if RENDER_DB_URL == "postgres://YOUR_EXTERNAL_URL_HERE":
@@ -35,9 +35,6 @@ def copy_table(table_name, columns):
         print(f"  - No data found in {table_name}.")
         return
 
-    # Delete existing data in target to avoid duplicates
-    pg_cur.execute(f"DELETE FROM {table_name}")
-    
     placeholders = ", ".join(["%s"] * len(columns))
     col_names = ", ".join(columns)
     
@@ -50,6 +47,11 @@ def copy_table(table_name, columns):
     print(f"  ✅ Copied {len(rows)} rows.")
 
 try:
+    print("🧹 Clearing existing data...")
+    pg_cur.execute("DELETE FROM prescriptions;")
+    pg_cur.execute("DELETE FROM logs;")
+    pg_cur.execute("DELETE FROM users;")
+
     # 1. Users
     user_cols = ["id", "name", "email", "age", "password_hash", "auth_provider", "provider_id", "phone", 
                  "is_active", "goal_steps", "goal_water", "goal_sleep", "goal_workout_days", "theme", 
