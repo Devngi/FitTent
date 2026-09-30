@@ -43,20 +43,31 @@ app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path="")
 # ── Session & Security Config ─────────────────────────────────
 # In production: set SECRET_KEY in .env to a long random string.
 app.secret_key = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
+
+# Detect production: when running on Render, PORT env var is set.
+_IS_PRODUCTION = bool(os.environ.get("RENDER") or os.environ.get("PORT"))
+
 app.config.update(
     SESSION_COOKIE_HTTPONLY  = True,
     SESSION_COOKIE_SAMESITE  = "Lax",
-    SESSION_COOKIE_SECURE    = False,   # Set True when behind HTTPS
+    SESSION_COOKIE_SECURE    = _IS_PRODUCTION,   # True on HTTPS (Render), False locally
     PERMANENT_SESSION_LIFETIME = timedelta(days=30),
 )
 
-CORS(app, supports_credentials=True,
-     origins=["http://127.0.0.1:5002", "http://localhost:5002"])
+# Allow the Render production URL + localhost for CORS
+_RENDER_URL = os.environ.get("RENDER_EXTERNAL_URL", "")
+_allowed_origins = ["http://127.0.0.1:5002", "http://localhost:5002"]
+if _RENDER_URL:
+    _allowed_origins.append(_RENDER_URL)
+
+CORS(app, supports_credentials=True, origins=_allowed_origins)
 
 # ── Google OAuth config ───────────────────────────────────────
 GOOGLE_CLIENT_ID     = os.environ.get("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
-GOOGLE_REDIRECT_URI  = "http://127.0.0.1:5002/api/auth/google/callback"
+# In production Render sets RENDER_EXTERNAL_URL automatically
+_base_url = os.environ.get("RENDER_EXTERNAL_URL", "http://127.0.0.1:5002")
+GOOGLE_REDIRECT_URI  = f"{_base_url.rstrip('/')}/api/auth/google/callback"
 
 # Build a single persistent OAuth client (avoids re-registration errors)
 _google_oauth = None
@@ -373,7 +384,10 @@ def api_delete_prescription(rx_id):
 #  STARTUP
 # ═══════════════════════════════════════════════════════════════
 
-if __name__ == "__main__":
+# Initialise database on every startup (works for both gunicorn and direct run)
+with app.app_context():
     db.init_db()
+
+if __name__ == "__main__":
     print("[FitTent] Server running → http://127.0.0.1:5002")
     app.run(debug=True, port=5002)

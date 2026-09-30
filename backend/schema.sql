@@ -1,12 +1,11 @@
 -- ============================================================
---  FitTent – SQLite Schema
---  File: schema.sql
---  Run automatically by server.py on first launch.
+--  FitTent – PostgreSQL Schema
+--  File: schema_pg.sql
 -- ============================================================
 
 -- ── Users / Profile table ────────────────────────────────────
 CREATE TABLE IF NOT EXISTS users (
-    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    id            SERIAL PRIMARY KEY,
     name          TEXT    NOT NULL DEFAULT '',
     email         TEXT    UNIQUE   DEFAULT '',
     age           INTEGER          DEFAULT NULL,
@@ -42,8 +41,8 @@ CREATE TABLE IF NOT EXISTS users (
     n_weekly      INTEGER NOT NULL DEFAULT 0,
     n_awards      INTEGER NOT NULL DEFAULT 1,
     -- Timestamps
-    created_at    TEXT    NOT NULL DEFAULT (datetime('now')),
-    updated_at    TEXT    NOT NULL DEFAULT (datetime('now'))
+    created_at    TEXT    NOT NULL DEFAULT (TO_CHAR(NOW() AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS')),
+    updated_at    TEXT    NOT NULL DEFAULT (TO_CHAR(NOW() AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS'))
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users (email) WHERE email != '';
@@ -51,20 +50,20 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users (email) WHERE email !
 
 -- ── Health / Workout Logs table ───────────────────────────────
 CREATE TABLE IF NOT EXISTS logs (
-    id              INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id         INTEGER NOT NULL DEFAULT 1,
-    log_date        TEXT    NOT NULL DEFAULT (date('now')),
-    workout_type    TEXT             DEFAULT NULL,
-    workout_duration INTEGER         DEFAULT NULL,
-    workout_intensity TEXT           DEFAULT NULL,
-    workout_notes   TEXT             DEFAULT NULL,
-    steps           INTEGER          DEFAULT NULL,
-    water_intake    REAL             DEFAULT NULL,
-    sleep_hours     REAL             DEFAULT NULL,
-    mood            TEXT             DEFAULT NULL,
-    energy_level    INTEGER          DEFAULT NULL,
-    medications_taken TEXT           DEFAULT NULL,
-    created_at      TEXT    NOT NULL DEFAULT (datetime('now')),
+    id               SERIAL PRIMARY KEY,
+    user_id          INTEGER NOT NULL DEFAULT 1,
+    log_date         TEXT    NOT NULL DEFAULT (TO_CHAR(NOW() AT TIME ZONE 'UTC', 'YYYY-MM-DD')),
+    workout_type     TEXT             DEFAULT NULL,
+    workout_duration INTEGER          DEFAULT NULL,
+    workout_intensity TEXT            DEFAULT NULL,
+    workout_notes    TEXT             DEFAULT NULL,
+    steps            INTEGER          DEFAULT NULL,
+    water_intake     REAL             DEFAULT NULL,
+    sleep_hours      REAL             DEFAULT NULL,
+    mood             TEXT             DEFAULT NULL,
+    energy_level     INTEGER          DEFAULT NULL,
+    medications_taken TEXT            DEFAULT NULL,
+    created_at       TEXT    NOT NULL DEFAULT (TO_CHAR(NOW() AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS')),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
@@ -75,20 +74,20 @@ CREATE INDEX IF NOT EXISTS idx_logs_user    ON logs (user_id);
 
 -- ── Prescriptions table ───────────────────────────────────
 CREATE TABLE IF NOT EXISTS prescriptions (
-    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    id              SERIAL PRIMARY KEY,
     user_id         INTEGER NOT NULL DEFAULT 1,
     med_name        TEXT    NOT NULL,
-    med_type        TEXT    NOT NULL DEFAULT 'pill',   -- pill | liquid | injection | patch | inhaler
-    dosage          TEXT    NOT NULL DEFAULT '',        -- numeric value e.g. "500"
-    dosage_unit     TEXT    NOT NULL DEFAULT 'mg',      -- mg | ml | units | mcg | g
+    med_type        TEXT    NOT NULL DEFAULT 'pill',
+    dosage          TEXT    NOT NULL DEFAULT '',
+    dosage_unit     TEXT    NOT NULL DEFAULT 'mg',
     start_date      TEXT             DEFAULT NULL,
     end_date        TEXT             DEFAULT NULL,
-    workout_intake  TEXT             DEFAULT 'none',    -- pre | post | with_meal | none
-    alarm_time      TEXT             DEFAULT NULL,      -- HH:MM 24-h
-    pill_color      TEXT             DEFAULT '#0d9488', -- CSS hex color for visual swatch
-    pill_shape      TEXT             DEFAULT 'round',   -- round | oval | capsule | square | diamond
+    workout_intake  TEXT             DEFAULT 'none',
+    alarm_time      TEXT             DEFAULT NULL,
+    pill_color      TEXT             DEFAULT '#0d9488',
+    pill_shape      TEXT             DEFAULT 'round',
     notes           TEXT             DEFAULT NULL,
-    created_at      TEXT    NOT NULL DEFAULT (datetime('now')),
+    created_at      TEXT    NOT NULL DEFAULT (TO_CHAR(NOW() AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS')),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
