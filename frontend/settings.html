@@ -602,7 +602,7 @@ async function savePassword() {
   btn.textContent = 'Saving…';
 
   try {
-    const res  = await fetch('http://127.0.0.1:5002/api/auth/password', {
+    const res  = await fetch(window.location.origin + '/api/auth/password', {
       method: 'PATCH',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
