@@ -216,7 +216,6 @@
   <div class="form-card">
     <div class="form-card-header">
       <h5>&#43; Add New Prescription</h5>
-      <small>All fields are saved securely to your database and used by the alarm system.</small>
     </div>
     <form class="form-card-body" id="rxForm" novalidate>
       <div class="info-banner">
@@ -277,10 +276,31 @@
             <option value="with_meal">With meal</option>
           </select>
         </div>
-        <div class="col-md-3">
-          <label for="rxAlarmTime" class="form-label">&#9200; Alarm Time</label>
-          <input type="time" class="form-control" id="rxAlarmTime" />
-          <div class="form-text">Browser will alert you daily at this time.</div>
+        <div class="col-md-12">
+          <label class="form-label">&#9200; Alarm Times (Select all that apply)</label>
+          <div class="d-flex flex-wrap gap-3">
+            <div class="form-check">
+              <input class="form-check-input rx-alarm-chk" type="checkbox" value="08:00" id="chkMorning">
+              <label class="form-check-label" for="chkMorning">Morning</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input rx-alarm-chk" type="checkbox" value="12:00" id="chkNoon">
+              <label class="form-check-label" for="chkNoon">Noon</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input rx-alarm-chk" type="checkbox" value="15:00" id="chkAfternoon">
+              <label class="form-check-label" for="chkAfternoon">Afternoon</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input rx-alarm-chk" type="checkbox" value="18:00" id="chkEvening">
+              <label class="form-check-label" for="chkEvening">Evening</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input rx-alarm-chk" type="checkbox" value="21:00" id="chkNight">
+              <label class="form-check-label" for="chkNight">Night</label>
+            </div>
+          </div>
+          <div class="form-text">Browser will alert you daily at these times.</div>
         </div>
       </div>
 
@@ -337,7 +357,6 @@
       <div class="d-flex align-items-center gap-3 pt-2 border-top" style="border-color:var(--border)!important;">
         <button type="submit" class="btn btn-submit" id="rxSaveBtn">&#9989;&nbsp; Save Prescription</button>
         <button type="reset"  class="btn btn-reset">&#8635; Reset</button>
-        <span class="ms-auto" style="font-size:.75rem;color:var(--muted);">&#128274; Saved securely</span>
       </div>
     </form>
   </div>
@@ -473,31 +492,51 @@ function _renderToday() {
     return;
   }
 
-  var now = new Date();
-  var html = '<div class="med-history-list">';
+  var remainingHtml = '';
+  var completedHtml = '';
+  var doneCount = 0;
+
   rxList.forEach(function(rx) {
     var isDone = !!(dayComp[rx.id] && dayComp[rx.id].done);
+    if (isDone) doneCount++;
     var doneAt = isDone ? dayComp[rx.id].at : null;
-    var alarmLabel = rx.alarmTime ? rx.alarmTime : (rx.workoutIntake !== 'none' ? rx.workoutIntake : 'anytime');
-    html += '<div class="med-hist-row' + (isDone ? ' done' : '') + '" onclick="toggleMedDone(\'' + rx.id + '\')" id="mhr-' + rx.id + '">';
-    html += '  <div class="mhr-check">' + (isDone ? '&#10003;' : '') + '</div>';
-    html += '  <div class="mhr-info">';
-    html += '    <div class="mhr-name">' + _esc(rx.name) + '</div>';
-    html += '    <div class="mhr-meta">' + _esc(rx.dosage || '') + (rx.dosage ? ' ' + _esc(rx.dosageUnit || '') : '') + ' &middot; ' + _esc(rx.type || 'pill') + '</div>';
-    html += '  </div>';
-    html += '  <div style="text-align:right">';
-    html += '    <div class="mhr-time">' + _esc(alarmLabel) + '</div>';
-    if (isDone) html += '    <div class="mhr-done-stamp">Taken at ' + doneAt + '</div>';
-    html += '  </div>';
-    html += '</div>';
+    var alarmStr = rx.alarm_time ? rx.alarm_time.split(',').join(', ') : null;
+    var alarmLabel = alarmStr ? alarmStr : (rx.workout_intake !== 'none' ? rx.workout_intake : 'anytime');
+    
+    var itemHtml = '<div class="med-hist-row' + (isDone ? ' done' : '') + '" onclick="toggleMedDone(\'' + rx.id + '\')" id="mhr-' + rx.id + '">';
+    itemHtml += '  <div class="mhr-check">' + (isDone ? '&#10003;' : '') + '</div>';
+    itemHtml += '  <div class="mhr-info">';
+    itemHtml += '    <div class="mhr-name">' + _esc(rx.name) + '</div>';
+    itemHtml += '    <div class="mhr-meta">' + _esc(rx.dosage || '') + (rx.dosage ? ' ' + _esc(rx.dosageUnit || '') : '') + ' &middot; ' + _esc(rx.type || 'pill') + '</div>';
+    itemHtml += '  </div>';
+    itemHtml += '  <div style="text-align:right">';
+    itemHtml += '    <div class="mhr-time">' + _esc(alarmLabel) + '</div>';
+    if (isDone) itemHtml += '    <div class="mhr-done-stamp">Taken at ' + doneAt + '</div>';
+    itemHtml += '  </div>';
+    itemHtml += '</div>';
+
+    if (isDone) {
+      completedHtml += itemHtml;
+    } else {
+      remainingHtml += itemHtml;
+    }
   });
+
+  var html = '<div class="med-history-list">';
+  if (remainingHtml) {
+    html += '<h6 style="font-size:0.8rem; font-weight:700; color:var(--text); margin-bottom: 0.8rem;">To Take</h6>';
+    html += remainingHtml;
+  }
+  if (completedHtml) {
+    html += '<h6 style="font-size:0.8rem; font-weight:700; color:var(--muted); margin-top: 1.5rem; margin-bottom: 0.8rem;">Taken (History)</h6>';
+    html += completedHtml;
+  }
   html += '</div>';
 
-  var done   = rxList.filter(function(rx){ return !!(dayComp[rx.id] && dayComp[rx.id].done); }).length;
   var total  = rxList.length;
   html += '<div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">';
   html += '  <span style="font-size:.82rem;color:var(--muted);">Today&rsquo;s progress</span>';
-  html += '  <span style="font-size:.82rem;font-weight:700;color:' + (done === total ? 'var(--primary)' : 'var(--muted)') + '">' + done + ' / ' + total + ' completed' + (done === total ? ' &#10003; All done!' : '') + '</span>';
+  html += '  <span style="font-size:.82rem;font-weight:700;color:' + (doneCount === total ? 'var(--primary)' : 'var(--muted)') + '">' + doneCount + ' / ' + total + ' completed' + (doneCount === total ? ' &#10003; All done!' : '') + '</span>';
   html += '</div>';
 
   body.innerHTML = html;

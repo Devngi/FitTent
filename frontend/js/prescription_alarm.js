@@ -103,11 +103,13 @@ function rxCardHTML(rx) {
   const typeInfo    = TYPE_LABELS[rx.med_type] || TYPE_LABELS.pill;
   const shapeSymbol = PILL_SHAPES[rx.pill_shape] || '⬤';
   const workoutTxt  = WORKOUT_LABELS[rx.workout_intake] || '—';
-  const alarmTxt    = rx.alarm_time ? ('⏰ ' + rx.alarm_time) : '—';
+  const alarmTxt    = rx.alarm_time ? ('⏰ ' + rx.alarm_time.split(',').join(', ')) : '—';
   const endDateTxt  = rx.end_date   ? rx.end_date             : 'Ongoing';
 
-  const todayKey   = rx.id + '_' + todayStr();
-  const alarmFired = _firedAlarms.has(todayKey);
+  const todayStrStr = todayStr();
+  const alarmFired = rx.alarm_time && rx.alarm_time.split(',').some(function(t) { 
+    return _firedAlarms.has(rx.id + '_' + todayStrStr + '_' + t.trim()); 
+  });
   const alarmBadge = rx.alarm_time
     ? ('<span class="rx-alarm-badge' + (alarmFired ? ' fired' : '') + '">' + alarmTxt + '</span>')
     : '';
@@ -151,6 +153,9 @@ async function rxHandleSubmit(e) {
     return el ? el.value : '';
   };
 
+  var checkedAlarms = Array.from(document.querySelectorAll('.rx-alarm-chk:checked')).map(function(c) { return c.value; });
+  var alarmsStr = checkedAlarms.length > 0 ? checkedAlarms.join(',') : null;
+
   const data = {
     med_name:       gv('rxMedName').trim()    || '',
     med_type:       gv('rxMedType')            || 'pill',
@@ -159,7 +164,7 @@ async function rxHandleSubmit(e) {
     start_date:     gv('rxStartDate')          || null,
     end_date:       gv('rxEndDate')            || null,
     workout_intake: gv('rxWorkoutIntake')      || 'none',
-    alarm_time:     gv('rxAlarmTime')          || null,
+    alarm_time:     alarmsStr,
     pill_color:     gv('rxPillColor')          || '#0d9488',
     pill_shape:     gv('rxPillShape')          || 'round',
     notes:          gv('rxNotes').trim()       || null,
@@ -175,6 +180,7 @@ async function rxHandleSubmit(e) {
     await rxCreate(data);
     showRxToast('💊 "' + data.med_name + '" saved successfully!', 'success');
     document.getElementById('rxForm').reset();
+    document.querySelectorAll('.rx-alarm-chk').forEach(function(c) { c.checked = false; });
     var colorEl   = document.getElementById('rxPillColor');
     var previewEl = document.getElementById('rxColorPreview');
     if (colorEl && previewEl) previewEl.style.background = colorEl.value;
@@ -261,14 +267,17 @@ function checkAlarms(prescriptions) {
     var rx = prescriptions[i];
     if (!rx.alarm_time) continue;
 
-    var key = rx.id + '_' + today;
+    var times = rx.alarm_time.split(',').map(function(t) { return t.trim(); });
+    
+    if (times.includes(nowHHMM)) {
+      var key = rx.id + '_' + today + '_' + nowHHMM;
+      if (!_firedAlarms.has(key)) {
+        _firedAlarms.add(key);
+        triggerAlarm(rx);
 
-    if (rx.alarm_time === nowHHMM && !_firedAlarms.has(key)) {
-      _firedAlarms.add(key);
-      triggerAlarm(rx);
-
-      var badge = document.querySelector('#rx-card-' + rx.id + ' .rx-alarm-badge');
-      if (badge) badge.classList.add('fired');
+        var badge = document.querySelector('#rx-card-' + rx.id + ' .rx-alarm-badge');
+        if (badge) badge.classList.add('fired');
+      }
     }
   }
 }
