@@ -1,79 +1,122 @@
-# FitTent
+<div align="center">
+  <img src="frontend/assets/favicon.png" alt="FitTent Logo" width="120" />
 
-FitTent is a comprehensive health and fitness tracking web application. It allows users to log workouts, track water intake, manage medications, monitor sleep, and track overall daily goals.
+  <h1>FitTent</h1>
+  
+  <p>
+    <strong>A modern, comprehensive health and fitness tracking web application.</strong>
+  </p>
 
-## 🔑 Demo Account
-A demo account with pre-filled data is automatically created on first server startup. You can log in at [https://fittent.onrender.com](https://fittent.onrender.com) using:
+  <p>
+    <a href="https://fittent.onrender.com"><strong>🚀 View Live Website</strong></a>
+    ·
+    <a href="#-features">Features</a>
+    ·
+    <a href="#%EF%B8%8F-architecture--tech-stack">Tech Stack</a>
+  </p>
+</div>
 
-| Field | Value |
-|---|---|
-| **Email** | `demo@fittent.app` |
-| **Password** | `Demo@1234` |
+---
 
+## 🌟 Overview
+
+FitTent is designed to be your all-in-one personal health dashboard. It allows you to effortlessly log workouts, monitor your daily water intake, manage medications and prescriptions, track your sleep patterns, and visualize your progress over time.
+
+👉 **[Launch FitTent Now](https://fittent.onrender.com)**
+
+### 🔑 Demo Account
+If you'd like to test the app without creating your own account, a pre-filled demo account is available:
+- **Email:** `demo@fittent.app`
+- **Password:** `Demo@1234`
+
+*(Alternatively, you can sign up for your own account or use Google One-Tap Sign In!)*
+
+---
+
+## ✨ Features
+
+- **📊 Daily Dashboard:** At-a-glance view of your steps, water, sleep, and workouts.
+- **🏋️ Workout Logging:** Track workout types, intensity, and duration with ease.
+- **💊 Medication Manager:** Save your prescriptions, set custom pill colors/shapes, and receive daily browser alarms for when it's time to take them.
+- **📈 Progress History:** Interactive charts (via Chart.js) to view your historical trends.
+- **🏆 Awards & Streaks:** Unlock achievements for hitting daily goals and maintaining healthy streaks.
+- **🔐 Secure Authentication:** Full local authentication system with HttpOnly sessions, plus Google OAuth integration.
+- **📱 Responsive UI:** Beautiful, glassmorphism-inspired dark mode interface that works perfectly on desktop and mobile.
+
+---
 
 ## 🏗️ Architecture & Tech Stack
 
-FitTent uses a lightweight, robust, and highly scalable architecture:
+FitTent uses a lightweight, robust, and highly scalable architecture designed for speed and simplicity.
 
-- **Frontend**: Vanilla HTML5, CSS3, and JavaScript. The frontend is fully statically served by the backend, ensuring fast load times and straightforward asset management.
-- **Backend**: Python 3 with the **Flask** micro-framework. It acts as both a REST API server for the frontend and a static file server.
-- **Database**: **PostgreSQL** (via `psycopg2`). The data-access layer uses raw SQL queries without a heavy ORM for maximum performance and simplicity.
-- **Authentication**: 
-  - Local email/password authentication (using `werkzeug` bcrypt hashing).
-  - Server-side HttpOnly sessions for security.
-  - Google OAuth integration for one-click logins.
+### Frontend
+- **HTML5 & CSS3:** Custom, modern styling with CSS variables (no heavy CSS frameworks).
+- **Vanilla JavaScript:** Fast and dependency-free frontend logic communicating with the backend REST API.
+- **Chart.js:** Used for rendering beautiful data visualizations in the History tab.
+
+### Backend
+- **Python 3 & Flask:** A lightweight micro-framework acting as both the REST API server and static file server.
+- **PostgreSQL:** Primary database using raw SQL (`psycopg2`) for maximum performance without the overhead of an ORM.
+- **Gunicorn:** Production WSGI HTTP server used for deploying the app on Render.
+
+---
 
 ## 🚀 Deployment Pipeline (Render)
 
-The application is configured to be seamlessly deployed on [Render.com](https://render.com). 
+This application is configured for seamless deployment on [Render](https://render.com).
 
-**Production Flow:**
-1. Code pushed to the `main` branch on GitHub automatically triggers a new deployment on Render.
+1. Code pushed to the `main` branch automatically triggers a deployment.
 2. Render installs dependencies from `requirements.txt`.
 3. The app is launched via Gunicorn (`gunicorn server:app`).
-4. The backend connects to a managed PostgreSQL database on Render using the automatically injected `DATABASE_URL` environment variable.
-5. On startup, `database.py` automatically runs `schema.sql` to ensure all necessary tables (users, logs, prescriptions) are present.
+4. The backend connects to the managed PostgreSQL database on Render.
+5. A GitHub Action periodically pings the server to ensure the free tier instance stays awake, eliminating cold-boot loading screens.
+
+---
 
 ## 💻 Local Development Setup
 
-Because FitTent uses PostgreSQL, you must have a local PostgreSQL server running or provide a remote `DATABASE_URL` in your environment.
+Because FitTent uses PostgreSQL, you must have a local PostgreSQL server running or provide a remote database URL.
 
 ### 1. Prerequisites
 - Python 3.10+
-- PostgreSQL Server installed locally
+- PostgreSQL Server (or a cloud DB URL)
 - Git
 
 ### 2. Installation
 Clone the repository and install dependencies:
 ```bash
-git clone https://github.com/your-username/FitTent.git
+git clone https://github.com/Devngi/FitTent.git
 cd FitTent
 pip install -r requirements.txt
 ```
 
 ### 3. Environment Variables
-Create a `.env` file inside the `backend` directory:
+Create a `.env` file inside the `backend` directory. **Do not use production keys here.**
 ```bash
-SECRET_KEY=your_super_secret_local_key
-DATABASE_URL=postgresql://postgres:password@localhost:5432/fittent
+SECRET_KEY=your_local_secret_key_here
+DATABASE_URL=postgresql://user:password@localhost:5432/fittent
 # Optional for Google Login:
 GOOGLE_CLIENT_ID=your_client_id
 GOOGLE_CLIENT_SECRET=your_client_secret
 ```
 
 ### 4. Run the Server
-You can use the startup script or run it directly:
+Use the included startup script, or run Python directly:
 ```bash
+# Easy startup
 ./start.sh
-# OR
+
+# Or manual startup
 cd backend
 python3 server.py
 ```
-The server will be available at `http://127.0.0.1:5002`.
+The server will start at `http://127.0.0.1:5002`.
+
+---
 
 ## 📂 Directory Structure
 
-```
+```text
 FitTent/
 ├── backend/
 │   ├── database.py       # Core PostgreSQL data-access layer
@@ -83,9 +126,16 @@ FitTent/
 ├── frontend/
 │   ├── index.html        # Main dashboard
 │   ├── login.html        # Authentication page
-│   ├── js/               # Frontend logic
-│   └── assets/           # Images, styles, etc.
-├── requirements.txt      # Python dependencies (Flask, psycopg2, Gunicorn, etc.)
-├── start.sh              # Bash script for easy local startup
-└── README.md             # Project documentation
+│   ├── history.html      # Chart visualizations
+│   ├── medication.html   # Prescription and alarm tracker
+│   ├── js/               # Vanilla JS controllers
+│   └── assets/           # Images, favicons, styles
+├── requirements.txt      # Python dependencies
+├── start.sh              # Bash script for local startup
+└── migrate_db.py         # Utility for data migrations
 ```
+
+---
+<div align="center">
+  <i>Built with ❤️ for health & fitness.</i>
+</div>
